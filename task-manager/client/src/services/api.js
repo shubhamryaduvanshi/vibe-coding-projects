@@ -64,4 +64,21 @@ export const userService = {
   getAll: () => api.get('/users')
 };
 
+// Report API
+export const reportService = {
+  getTimeReport: (params) => api.get('/reports/time', { params }),
+  getTaskWorklogSummary: (taskId) => api.get(`/reports/task/${taskId}`),
+  getUserWorklogSummary: (userId) => api.get(`/reports/user/${userId}`),
+  getDateRangeReport: (start, end) => api.get('/reports/range', { params: { start, end } })
+};
+
+// Worklog API
+export const worklogService = {
+  create: (worklogData) => api.post('/worklogs', worklogData),
+  getByTask: (taskId) => api.get(`/worklogs/task/${taskId}`),
+  getByUser: () => api.get('/worklogs/user'),
+  update: (id, worklogData) => api.put(`/worklogs/${id}`, worklogData),
+  delete: (id) => api.delete(`/worklogs/${id}`)
+};
+
 export default api;

@@ -144,12 +144,16 @@ const boardRoutes = require('./routes/boardRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+const worklogRoutes = require('./routes/worklogRoutes');
 
 // Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/boards', boardRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/worklogs', worklogRoutes);
 
 // Basic route for health check
 app.get('/', (req, res) => {

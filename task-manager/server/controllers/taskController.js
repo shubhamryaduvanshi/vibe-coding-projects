@@ -1,6 +1,7 @@
 const Task = require('../models/Task');
 const Board = require('../models/Board');
 const User = require('../models/User');
+const Worklog = require('../models/Worklog');
 
 const taskPopulateOptions = [
   { path: 'assignee', select: '_id name email' },
@@ -75,7 +76,9 @@ exports.createTask = async (req, res) => {
       priority: priority || 'medium',
       assignee: assignee || null,
       boardId,
-      position
+      position,
+      estimatedHours: req.body.estimatedHours || 0,
+      actualHours: req.body.actualHours || 0
     });
 
     task.activityLog.push({
@@ -88,6 +91,23 @@ exports.createTask = async (req, res) => {
     });
 
     const savedTask = await task.save();
+    
+    // Auto-create worklog if actualHours is provided
+    if (req.body.actualHours && req.body.actualHours > 0) {
+      try {
+        const worklog = new Worklog({
+          taskId: savedTask._id,
+          userId: req.user?._id,
+          hours: parseFloat(req.body.actualHours),
+          description: `Auto-logged from task creation`,
+          date: new Date()
+        });
+        await worklog.save();
+      } catch (err) {
+        console.error('Error creating worklog:', err);
+      }
+    }
+    
     await savedTask.populate(taskPopulateOptions);
     res.status(201).json(savedTask);
   } catch (error) {
@@ -98,7 +118,7 @@ exports.createTask = async (req, res) => {
 // Update a task
 exports.updateTask = async (req, res) => {
   try {
-    const { title, description, status, priority, position, assignee } = req.body;
+    const { title, description, status, priority, position, assignee, estimatedHours, actualHours } = req.body;
     
     const task = await Task.findById(req.params.id);
     
@@ -164,6 +184,8 @@ exports.updateTask = async (req, res) => {
     if (title !== undefined) task.title = title;
     if (description !== undefined) task.description = description;
     if (priority !== undefined) task.priority = priority;
+    if (estimatedHours !== undefined) task.estimatedHours = estimatedHours;
+    if (actualHours !== undefined) task.actualHours = actualHours;
     if (assignee !== undefined) {
       if (assignee === null || assignee === '') {
         const previousAssigneeId = task.assignee ? task.assignee.toString() : null;
@@ -204,8 +226,39 @@ exports.updateTask = async (req, res) => {
     }
 
     const updatedTask = await task.save();
+    
+    // Auto-create/update worklog when actualHours changes
+    if (actualHours !== undefined && actualHours > 0) {
+      try {
+        // Check if a worklog already exists for this task from auto-logging
+        const existingWorklog = await Worklog.findOne({
+          taskId: task._id,
+          description: { $regex: 'Auto-logged' }
+        });
+        
+        if (existingWorklog) {
+          // Update existing worklog
+          existingWorklog.hours = parseFloat(actualHours);
+          existingWorklog.date = new Date();
+          await existingWorklog.save();
+        } else {
+          // Create new worklog
+          const worklog = new Worklog({
+            taskId: task._id,
+            userId: req.user?._id,
+            hours: parseFloat(actualHours),
+            description: `Auto-logged from task update`,
+            date: new Date()
+          });
+          await worklog.save();
+        }
+      } catch (err) {
+        console.error('Error managing worklog:', err);
+      }
+    }
+    
     await updatedTask.populate(taskPopulateOptions);
-    res.json(updatedTask);
+    return res.json(updatedTask);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update task' });
   }

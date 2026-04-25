@@ -30,7 +30,9 @@ const TaskForm = ({ task, onSave, onCancel, onAddComment, onDeleteComment, statu
     description: '',
     priority: 'medium',
     status: status || 'Todo',
-    assignee: ''
+    assignee: '',
+    estimatedHours: 0,
+    actualHours: 0
   });
   const [commentDraft, setCommentDraft] = useState('');
   const [isSavingComment, setIsSavingComment] = useState(false);
@@ -42,13 +44,17 @@ const TaskForm = ({ task, onSave, onCancel, onAddComment, onDeleteComment, statu
         description: task.description || '',
         priority: task.priority || 'medium',
         status: task.status || status || 'Todo',
-        assignee: task.assignee?._id || ''
+        assignee: task.assignee?._id || '',
+        estimatedHours: task.estimatedHours || 0,
+        actualHours: task.actualHours || 0
       });
     } else {
       setFormData(prev => ({
         ...prev,
         status: status || 'Todo',
-        assignee: ''
+        assignee: '',
+        estimatedHours: 0,
+        actualHours: 0
       }));
     }
   }, [task, status]);
@@ -131,7 +137,7 @@ const TaskForm = ({ task, onSave, onCancel, onAddComment, onDeleteComment, statu
 
       <div className="grid min-h-[60vh] grid-cols-1 lg:grid-cols-[1.5fr_1fr]">
         <form onSubmit={handleSubmit} className="border-r border-slate-200 bg-white px-6 py-6 sm:px-8">
-          <div className="grid gap-5 md:grid-cols-2">
+          {/* <div className="grid gap-5 md:grid-cols-2"> */}
             <div className="md:col-span-2">
               <label className="label">Title *</label>
               <input
@@ -184,6 +190,34 @@ const TaskForm = ({ task, onSave, onCancel, onAddComment, onDeleteComment, statu
                 <option value="high">High</option>
               </select>
             </div>
+            <div>
+              <label className="label">Estimated Hours</label>
+              <input
+                type="number"
+                name="estimatedHours"
+                value={formData.estimatedHours}
+                onChange={handleChange}
+                className="input rounded-2xl px-4 py-3"
+                placeholder="0"
+                min="0"
+                max="1000"
+                step="0.5"
+              />
+            </div>
+            <div>
+              <label className="label">Actual Hours</label>
+              <input
+                type="number"
+                name="actualHours"
+                value={formData.actualHours}
+                onChange={handleChange}
+                className="input rounded-2xl px-4 py-3"
+                placeholder="0"
+                min="0"
+                max="1000"
+                step="0.5"
+              />
+            </div>
 
             <div className="md:col-span-2">
               <label className="label">Assignee</label>
@@ -201,7 +235,7 @@ const TaskForm = ({ task, onSave, onCancel, onAddComment, onDeleteComment, statu
                 ))}
               </select>
             </div>
-          </div>
+
 
           <div className="mt-8 flex flex-wrap justify-end gap-3 border-t border-slate-200 pt-6">
             <button

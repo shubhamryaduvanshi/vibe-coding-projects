@@ -37,6 +37,18 @@ const taskSchema = new mongoose.Schema({
     required: true,
     default: 0
   },
+  estimatedHours: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 1000
+  },
+  actualHours: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 1000
+  },
   comments: [
     {
       body: {

@@ -30,6 +30,14 @@ const Board = ({ onBoardDeleted }) => {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [taskStatus, setTaskStatus] = useState('Todo');
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    assignedUser: '',
+    status: '',
+    taskName: '',
+    priority: ''
+  });
 
   useEffect(() => {
     fetchUsers().catch(() => {});
@@ -100,6 +108,51 @@ const Board = ({ onBoardDeleted }) => {
 
   const columns = currentBoard.columns || ['Todo', 'In Progress', 'Done'];
 
+  // Filter tasks based on current filters
+  const getFilteredTasks = () => {
+    return tasks.filter((task) => {
+      // Filter by assigned user
+      if (filters.assignedUser) {
+        const assigneeId = task.assignee?._id || task.assignee;
+        if (assigneeId !== filters.assignedUser) {
+          return false;
+        }
+      }
+
+      // Filter by status
+      if (filters.status && task.status !== filters.status) {
+        return false;
+      }
+
+      // Filter by task name
+      if (filters.taskName.trim() && !task.title.toLowerCase().includes(filters.taskName.toLowerCase())) {
+        return false;
+      }
+
+      // Filter by priority
+      if (filters.priority && task.priority !== filters.priority) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
+  const filteredTasks = getFilteredTasks();
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({ ...prev, [filterType]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      assignedUser: '',
+      status: '',
+      taskName: '',
+      priority: ''
+    });
+  };
+
   return (
     <div className="p-3 sm:p-6 min-h-[90dvh]">
       {error && (
@@ -119,7 +172,91 @@ const Board = ({ onBoardDeleted }) => {
         
         <div className="flex flex-col gap-1 text-gray-600 sm:flex-row sm:items-center">
           <span className="mr-0 sm:mr-4">Columns: {columns.join(', ')}</span>
-          <span className="text-sm">Total Tasks: {tasks.length}</span>
+          <span className="text-sm">Total Tasks: {filteredTasks.length} {tasks.length !== filteredTasks.length && `(filtered from ${tasks.length})`}</span>
+        </div>
+      </div>
+
+      {/* Filters Section */}
+      <div className="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-800">Filters</h3>
+          {(filters.assignedUser || filters.status || filters.taskName.trim() || filters.priority) && (
+            <button
+              onClick={clearFilters}
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Task Name Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Task Name</label>
+            <input
+              type="text"
+              value={filters.taskName}
+              onChange={(e) => handleFilterChange('taskName', e.target.value)}
+              placeholder="Search tasks..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+            />
+          </div>
+
+          {/* Assigned User Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Assigned User</label>
+            <select
+              value={filters.assignedUser}
+              onChange={(e) => handleFilterChange('assignedUser', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-white"
+            >
+              <option value="">Select a user...</option>
+              {users?.length > 0 ? (
+                users.map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No users available</option>
+              )}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-white"
+            >
+              <option value="">Select status...</option>
+              {columns.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Priority Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+            <select
+              value={filters.priority}
+              onChange={(e) => handleFilterChange('priority', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-white"
+            >
+              <option value="">Select priority...</option>
+              {['low', 'medium', 'high'].map((priority) => (
+                <option key={priority} value={priority}>
+                  {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -136,17 +273,20 @@ const Board = ({ onBoardDeleted }) => {
         onDragCancel={() => setActiveTask(null)}
       >
         <div className="flex gap-6 overflow-x-auto pb-4">
-          {columns.map((column) => (
-            <Column
-              key={column}
-              status={column}
-              title={column}
-              tasks={getTasksByStatus(column)}
-              onAddTask={handleAddTask}
-              onEditTask={handleEditTask}
-              onDeleteTask={handleDeleteTask}
-            />
-          ))}
+          {columns.map((column) => {
+            const columnTasks = filteredTasks.filter(task => task.status === column);
+            return (
+              <Column
+                key={column}
+                status={column}
+                title={column}
+                tasks={columnTasks}
+                onAddTask={handleAddTask}
+                onEditTask={handleEditTask}
+                onDeleteTask={handleDeleteTask}
+              />
+            );
+          })}
         </div>
 
         <DragOverlay>

@@ -51,7 +51,7 @@ export const BoardPage = () => {
     const destinationIndex =
       destinationColumn.tasks.findIndex((task) => task.id === event.over?.id) >= 0
         ? destinationColumn.tasks.findIndex((task) => task.id === event.over?.id)
-        : destinationColumn.tasks.length;
+        : destinationColumn.tasks?.length;
 
     reorderMutation.mutate({
       taskId: activeTask.id,

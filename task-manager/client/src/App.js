@@ -6,10 +6,15 @@ import Board from './components/Board';
 import BoardSelector from './components/BoardSelector';
 import BoardForm from './components/BoardForm';
 import AuthForm from './components/AuthForm';
+import ReportPage from './components/ReportPage';
 
 const getBoardIdFromPath = (pathname) => {
   const match = pathname.match(/^\/boards\/([^/]+)\/?$/);
   return match ? decodeURIComponent(match[1]) : null;
+};
+
+const isReportsPath = (pathname) => {
+  return pathname === '/reports/time' || pathname.startsWith('/reports/');
 };
 
 function KanbanShell() {
@@ -18,6 +23,7 @@ function KanbanShell() {
   const [pathname, setPathname] = React.useState(() => window.location.pathname);
   const [showBoardForm, setShowBoardForm] = React.useState(false);
   const boardId = getBoardIdFromPath(pathname);
+  const isReports = isReportsPath(pathname);
 
   React.useEffect(() => {
     const handlePopState = () => {
@@ -56,6 +62,10 @@ function KanbanShell() {
     navigateTo('/');
   }, [clearCurrentBoard, navigateTo]);
 
+  const goToReports = React.useCallback(() => {
+    navigateTo('/reports/time');
+  }, [navigateTo]);
+
   const handleSaveBoard = async (boardData) => {
     await updateBoard(currentBoard._id, boardData);
     setShowBoardForm(false);
@@ -90,6 +100,12 @@ function KanbanShell() {
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span>{user?.name}</span>
               </div>
+              <button
+                className="px-5 py-2.5 border border-blue-300 text-blue-700 font-medium rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+                onClick={goToReports}
+              >
+                Reports
+              </button>
               <button className="px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200" onClick={logout}>
                 Logout
               </button>
@@ -99,13 +115,27 @@ function KanbanShell() {
       </header>
 
       <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1">
-        {!boardId && (
+        {isReports ? (
+          <div className="mb-8 rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-lg">
+            <div className="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={goToDashboard}
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Back to Dashboard
+                </button>
+                <h2 className="text-2xl font-bold text-gray-900">Time Report</h2>
+              </div>
+            </div>
+            <ReportPage />
+          </div>
+        ) : !boardId ? (
           <div className="mb-8 rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-lg">
             <BoardSelector onBoardSelect={openBoardRoute} />
           </div>
-        )}
-
-        {boardId && (
+        ) : (
           <div className="mb-6 rounded-2xl bg-gradient-to-r from-primary-50 to-transparent p-1">
             <div className="rounded-xl border border-gray-200 bg-white/50 backdrop-blur-sm p-3 sm:p-5">
               <div className="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
