@@ -2,6 +2,72 @@ import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+const getPriorityColor = (priority) => {
+  switch (priority) {
+    case 'high': return 'from-rose-50 via-white to-rose-100 border-rose-200 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:border-slate-800';
+    case 'medium': return 'from-amber-50 via-white to-yellow-100 border-amber-200 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:border-slate-800';
+    case 'low': return 'from-emerald-50 via-white to-green-100 border-emerald-200 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:border-slate-800';
+    default: return 'from-slate-50 via-white to-slate-100 border-slate-200 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:border-slate-800';
+  }
+};
+
+const getPriorityText = (priority) => {
+  switch (priority) {
+    case 'high': return 'High';
+    case 'medium': return 'Medium';
+    case 'low': return 'Low';
+    default: return 'Medium';
+  }
+};
+
+const isTaskDelayed = (task) => {
+  if (!task.dueDate) return false;
+  const dueDate = new Date(task.dueDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  dueDate.setHours(0, 0, 0, 0);
+  return dueDate < today && task.status !== 'Done';
+};
+
+const formatDueDate = (dueDate) => {
+  if (!dueDate) return 'No due date';
+  const date = new Date(dueDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(date);
+  due.setHours(0, 0, 0, 0);
+  
+  const diffTime = due - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Tomorrow';
+  if (diffDays === -1) return 'Yesterday';
+  if (diffDays < 0) return `${Math.abs(diffDays)} days overdue`;
+  if (diffDays <= 7) return `In ${diffDays} days`;
+  
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+const getDueDateColor = (dueDate, status) => {
+  if (!dueDate) return 'text-slate-500';
+  const date = new Date(dueDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(date);
+  due.setHours(0, 0, 0, 0);
+  
+  if (status === 'Done') return 'text-emerald-600 dark:text-emerald-400';
+  
+  const diffTime = due - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) return 'text-rose-600 dark:text-rose-400';
+  if (diffDays === 0) return 'text-amber-600 dark:text-amber-400';
+  if (diffDays <= 3) return 'text-amber-600 dark:text-amber-400';
+  return 'text-slate-600 dark:text-slate-400';
+};
+
 const TaskCard = ({ task, index, onEdit, onDelete }) => {
   const {
     attributes,
@@ -27,71 +93,6 @@ const TaskCard = ({ task, index, onEdit, onDelete }) => {
   };
   const [isHovered, setIsHovered] = useState(false);
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'high': return 'from-rose-50 via-white to-rose-100 border-rose-200 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:border-slate-800';
-      case 'medium': return 'from-amber-50 via-white to-yellow-100 border-amber-200 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:border-slate-800';
-      case 'low': return 'from-emerald-50 via-white to-green-100 border-emerald-200 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:border-slate-800';
-      default: return 'from-slate-50 via-white to-slate-100 border-slate-200 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:border-slate-800';
-    }
-  };
-
-  const getPriorityText = (priority) => {
-    switch (priority) {
-      case 'high': return 'High';
-      case 'medium': return 'Medium';
-      case 'low': return 'Low';
-      default: return 'Medium';
-    }
-  };
-
-  const isTaskDelayed = (task) => {
-    if (!task.dueDate) return false;
-    const dueDate = new Date(task.dueDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    dueDate.setHours(0, 0, 0, 0);
-    return dueDate < today && task.status !== 'Done';
-  };
-
-  const formatDueDate = (dueDate) => {
-    if (!dueDate) return 'No due date';
-    const date = new Date(dueDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const due = new Date(date);
-    due.setHours(0, 0, 0, 0);
-    
-    const diffTime = due - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Tomorrow';
-    if (diffDays === -1) return 'Yesterday';
-    if (diffDays < 0) return `${Math.abs(diffDays)} days overdue`;
-    if (diffDays <= 7) return `In ${diffDays} days`;
-    
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
-  const getDueDateColor = (dueDate, status) => {
-    if (!dueDate) return 'text-slate-500';
-    const date = new Date(dueDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const due = new Date(date);
-    due.setHours(0, 0, 0, 0);
-    
-    if (status === 'Done') return 'text-emerald-600 dark:text-emerald-400';
-    
-    const diffTime = due - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) return 'text-rose-600 dark:text-rose-400';
-    if (diffDays === 0) return 'text-amber-600 dark:text-amber-400';
-    if (diffDays <= 3) return 'text-amber-600 dark:text-amber-400';
-    return 'text-slate-600 dark:text-slate-400';
-  };
 
   return (
     <div
@@ -128,9 +129,9 @@ const TaskCard = ({ task, index, onEdit, onDelete }) => {
         </span>
       </div>
       
-      <p className="mb-4 line-clamp-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">{task.description || 'No description'}</p>
+      <p className="mb-4 line-clamp-2 text-sm text-slate-600 dark:text-slate-300 sm:text-base">{task.description || 'No description'}</p>
 
-      <div className="mb-4 grid grid-cols-3 gap-3 text-xs text-slate-600">
+      <div className="mb-4 grid grid-cols-2 gap-3 text-xs text-slate-600">
         <div className="rounded-xl border border-white/70 bg-white/70 p-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
           <p className="mb-1 font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-400">Assignee</p>
           <p className="line-clamp-2 text-sm font-medium text-slate-800 dark:text-slate-100">
@@ -143,10 +144,10 @@ const TaskCard = ({ task, index, onEdit, onDelete }) => {
             {formatDueDate(task.dueDate)}
           </p>
         </div>
-        <div className="rounded-xl border border-white/70 bg-white/70 p-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+        {/* <div className="rounded-xl border border-white/70 bg-white/70 p-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
           <p className="mb-1 font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-400">Comments</p>
           <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{task.comments?.length || 0}</p>
-        </div>
+        </div> */}
       </div>
       
       <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
@@ -167,7 +168,7 @@ const TaskCard = ({ task, index, onEdit, onDelete }) => {
           >
             Open
           </button>
-          <button
+          {/* <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete(task._id);
@@ -175,11 +176,19 @@ const TaskCard = ({ task, index, onEdit, onDelete }) => {
             className="rounded-full px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950/40"
           >
             Delete
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
   );
+};
+
+export {
+  getPriorityColor,
+  getPriorityText,
+  isTaskDelayed,
+  formatDueDate,
+  getDueDateColor,
 };
 
 export default TaskCard;

@@ -7,6 +7,13 @@ import ModalPortal from './ModalPortal';
 import { useKanban } from '../context/KanbanContext';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { useAuth } from '../context/AuthContext';
+import {
+  getPriorityColor,
+  getPriorityText,
+  isTaskDelayed,
+  formatDueDate,
+  getDueDateColor,
+} from './TaskCard';
 
 const Board = ({ onBoardDeleted }) => {
   const {
@@ -333,9 +340,72 @@ const Board = ({ onBoardDeleted }) => {
 
         <DragOverlay>
           {activeTask && (
-            <div className="p-4 opacity-90 bg-white rounded-lg shadow-lg border border-gray-200">
-              <h3 className="font-bold">{activeTask.title}</h3>
-              <p className="text-sm text-gray-600">{activeTask.description}</p>
+            <div
+              className={`task-card mb-3 rounded-2xl border bg-gradient-to-br p-4 shadow-xl transform scale-105 transition-all ${getPriorityColor(activeTask.priority)} ${isTaskDelayed(activeTask) ? 'border-rose-300 dark:border-rose-700' : ''}`}
+              style={{ opacity: 0.9, cursor: 'grabbing' }}
+            >
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
+                      Ticket
+                    </span>
+                    <span className="rounded-full bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white/90 dark:bg-slate-700">
+                      {activeTask.status}
+                    </span>
+                    {isTaskDelayed(activeTask) && (
+                      <span className="rounded-full bg-rose-500 px-2.5 py-1 text-[11px] font-semibold text-white/90 dark:bg-rose-600">
+                        Critical
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-slate-50 sm:text-lg">{activeTask.title}</h3>
+                </div>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${activeTask.priority === 'high' ? 'bg-rose-500 text-white' : activeTask.priority === 'medium' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                  {getPriorityText(activeTask.priority)}
+                </span>
+              </div>
+              
+              <p className="mb-4 line-clamp-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">{activeTask.description || 'No description'}</p>
+
+              <div className="mb-4 grid grid-cols-3 gap-3 text-xs text-slate-600">
+                <div className="rounded-xl border border-white/70 bg-white/70 p-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+                  <p className="mb-1 font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-400">Assignee</p>
+                  <p className="line-clamp-2 text-sm font-medium text-slate-800 dark:text-slate-100">
+                    {activeTask.assignee ? activeTask.assignee.name : 'Unassigned'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-white/70 bg-white/70 p-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+                  <p className="mb-1 font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-400">Due Date</p>
+                  <p className={`text-sm font-medium ${getDueDateColor(activeTask.dueDate, activeTask.status)}`}>
+                    {formatDueDate(activeTask.dueDate)}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-white/70 bg-white/70 p-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+                  <p className="mb-1 font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-400">Comments</p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{activeTask.comments?.length || 0}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+                <span className="text-xs">
+                  Updated {new Date(activeTask.updatedAt || activeTask.createdAt).toLocaleDateString()}
+                </span>
+                <div className="flex space-x-2">
+                  <button
+                    className="rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-200 bg-white text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+                    disabled
+                  >
+                    Open
+                  </button>
+                  <button
+                    className="rounded-full px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-300"
+                    disabled
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </DragOverlay>
