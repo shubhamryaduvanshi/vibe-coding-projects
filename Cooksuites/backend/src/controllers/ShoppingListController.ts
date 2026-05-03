@@ -23,6 +23,20 @@ export class ShoppingListController {
     }
   }
 
+  async generateAdvanced(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const validated = GenerateListSchema.parse(req.body);
+      const list = await shoppingListService.generateAdvanced(
+        validated.recipeIds,
+        req.user!.id,
+        validated.name
+      );
+      res.status(201).json({ success: true, data: list });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async list(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const lists = await shoppingListService.listUserShoppingLists(req.user!.id);

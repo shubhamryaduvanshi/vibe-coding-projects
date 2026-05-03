@@ -1,10 +1,11 @@
 import { PrismaClient, ShoppingList } from '@prisma/client';
+import { UnitConverter, ParsedIngredient } from '../utils/unitConverter';
 
 const prisma = new PrismaClient();
 
 export class ShoppingListService {
   async generateFromRecipes(recipeIds: string[], userId: string, listName: string): Promise<ShoppingList> {
-    // 1. Fetch all ingredients for the given recipes
+    // Basic aggregation keeping units separate
     const recipes = await prisma.recipe.findMany({
       where: { id: { in: recipeIds } },
       include: { ingredients: true }
@@ -26,8 +27,7 @@ export class ShoppingListService {
       });
     });
 
-    // 2. Create the shopping list
-    const shoppingList = await prisma.shoppingList.create({
+    return prisma.shoppingList.create({
       data: {
         name: listName,
         userId,
@@ -44,8 +44,43 @@ export class ShoppingListService {
       },
       include: { items: true }
     });
+  }
 
-    return shoppingList;
+  async generateAdvanced(recipeIds: string[], userId: string, listName: string): Promise<ShoppingList> {
+    // Advanced aggregation with cross-unit conversion
+    const recipes = await prisma.recipe.findMany({
+      where: { id: { in: recipeIds } },
+      include: { ingredients: true }
+    });
+
+    const rawIngredients: ParsedIngredient[] = [];
+
+    recipes.forEach(recipe => {
+      recipe.ingredients.forEach(ing => {
+        rawIngredients.push({
+          name: ing.name,
+          quantity: ing.quantity,
+          unit: ing.unit
+        });
+      });
+    });
+
+    const mergedIngredients = UnitConverter.mergeIngredients(rawIngredients);
+
+    return prisma.shoppingList.create({
+      data: {
+        name: listName,
+        userId,
+        items: {
+          create: mergedIngredients.map(ing => ({
+            name: ing.name,
+            quantity: ing.quantity,
+            unit: ing.unit
+          }))
+        }
+      },
+      include: { items: true }
+    });
   }
 
   async getShoppingList(id: string): Promise<ShoppingList | null> {

@@ -6,6 +6,7 @@ const router = Router();
 
 router.use(authenticate);
 
+router.post('/generate-advanced', shoppingListController.generateAdvanced);
 router.post('/generate', shoppingListController.generate);
 router.get('/', shoppingListController.list);
 router.get('/:id', shoppingListController.get);

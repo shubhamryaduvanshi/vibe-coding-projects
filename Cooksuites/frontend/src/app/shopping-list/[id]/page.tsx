@@ -53,7 +53,7 @@ export default function ShoppingListDetailPage() {
         if (!prev) return null;
         return {
           ...prev,
-          items: prev.items.map(item => 
+          items: (prev.items || []).map(item => 
             item.id === itemId ? { ...item, isPurchased: !item.isPurchased } : item
           )
         };
@@ -84,8 +84,8 @@ export default function ShoppingListDetailPage() {
 
   if (!list) return null;
 
-  const purchasedCount = list.items.filter(i => i.isPurchased).length;
-  const progress = (purchasedCount / list.items.length) * 100;
+  const purchasedCount = (list.items || []).filter(i => i.isPurchased).length;
+  const progress = list.items && list.items.length > 0 ? (purchasedCount / list.items.length) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -146,7 +146,7 @@ export default function ShoppingListDetailPage() {
                   <div>
                     <h3 className="text-xl font-bold text-emerald-900 mb-1">List Progress</h3>
                     <p className="text-sm text-zinc-500 font-medium">
-                      You've picked up <span className="text-emerald-700 font-bold">{purchasedCount}</span> of {list.items.length} items
+                      You've picked up <span className="text-emerald-700 font-bold">{purchasedCount}</span> of {list.items?.length || 0} items
                     </p>
                   </div>
                 </div>
@@ -164,7 +164,7 @@ export default function ShoppingListDetailPage() {
 
           {/* Items List */}
           <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
-            {list.items.map((item) => (
+            {(list.items || []).map((item) => (
               <div 
                 key={item.id}
                 onClick={() => handleToggle(item.id)}
@@ -207,7 +207,7 @@ export default function ShoppingListDetailPage() {
             ))}
           </div>
 
-          {list.items.length === 0 && (
+          {(!list.items || list.items.length === 0) && (
             <div className="p-24 text-center border-2 border-dashed border-zinc-100 rounded-[3rem] text-zinc-400 flex flex-col items-center">
               <ShoppingCart className="h-12 w-12 mb-4 opacity-20" />
               <p className="text-xl font-bold text-emerald-900">Your list is empty</p>

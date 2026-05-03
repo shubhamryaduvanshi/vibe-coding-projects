@@ -12,6 +12,9 @@ async function main() {
     { name: 'cookbook:create', resource: 'cookbook', action: 'create' },
     { name: 'cookbook:share', resource: 'cookbook', action: 'share' },
     { name: 'admin:manage', resource: 'admin', action: 'manage' },
+    { name: 'mealplan:create', resource: 'mealplan', action: 'create' },
+    { name: 'mealplan:read', resource: 'mealplan', action: 'read' },
+    { name: 'mealplan:delete', resource: 'mealplan', action: 'delete' },
   ];
 
   for (const perm of permissions) {
