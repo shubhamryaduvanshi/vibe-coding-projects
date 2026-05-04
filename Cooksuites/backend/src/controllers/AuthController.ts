@@ -136,6 +136,48 @@ export class AuthController {
     }
   }
 
+  async refreshToken(req: Request, res: Response, next: NextFunction) {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      if (!refreshToken) {
+        return res.status(401).json({
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: 'No refresh token provided' }
+        });
+      }
+
+      const decoded = authService.verifyRefreshToken(refreshToken);
+      const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: 'Invalid refresh token' }
+        });
+      }
+
+      const tokens = authService.generateTokens(user.id);
+
+      res.cookie('refreshToken', tokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+
+      res.status(200).json({
+        success: true,
+        data: { accessToken: tokens.accessToken },
+        meta: { timestamp: new Date().toISOString(), requestId: req.headers['x-request-id'] as string }
+      });
+    } catch (error) {
+      return res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Invalid or expired refresh token' }
+      });
+    }
+  }
+
   async getProfile(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const user = await prisma.user.findUnique({

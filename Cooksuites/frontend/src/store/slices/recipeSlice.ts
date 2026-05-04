@@ -9,7 +9,8 @@ export interface Recipe {
   difficulty: string;
   images?: { url: string }[];
   category?: { name: string };
-  user?: { email: string };
+  user?: { id: string, email: string };
+  userId?: string;
   cuisine?: string
   mealType?: string;
   servings: number;

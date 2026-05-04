@@ -9,6 +9,7 @@ import { RootState } from '@/store';
 import { StepItem } from './StepItem';
 import { IngredientsFieldArray } from './IngredientsFieldArray';
 import { recipeService } from '@/services/recipeService';
+import api from '@/lib/api';
 import { useParams } from 'next/navigation';
 import { useEffect } from 'react';
 import {
@@ -185,18 +186,11 @@ export function RecipeForm({ initialValues, isEditMode = false }: RecipeFormProp
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await fetch('http://localhost:4000/api/v1/media', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: formData
+    const res = await api.post('/media', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
 
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error?.message || 'File upload failed');
-    }
-    const data = await res.json();
-    return data.data.url;
+    return res.data.data.url;
   };
 
   const onSubmit = async (values: RecipeFormValues) => {

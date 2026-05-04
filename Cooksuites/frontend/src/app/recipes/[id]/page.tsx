@@ -93,7 +93,7 @@ export default function RecipeViewPage() {
         </div>
         <div className="flex items-center gap-4">
           <AddToCookbookDialog recipeId={id} />
-          <button 
+          <button
             onClick={() => router.push(`/recipes/${id}/edit`)}
             className="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg font-label-sm text-label-sm hover:bg-zinc-50 transition-colors"
           >
@@ -141,7 +141,7 @@ export default function RecipeViewPage() {
                   <Users className="text-primary h-5 w-5" />
                   <div className="flex flex-col">
                     <span className="font-label-sm text-[10px] text-on-surface-variant uppercase">Servings</span>
-                    <span className="font-headline-sm text-headline-sm">2 People</span>
+                    <span className="font-headline-sm text-headline-sm">{recipe.servings}</span>
                   </div>
                 </div>
               </div>

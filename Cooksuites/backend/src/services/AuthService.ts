@@ -26,6 +26,11 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  verifyRefreshToken(token: string): { id: string } {
+    const refreshSecret = process.env.JWT_REFRESH_SECRET || 'another-super-secret-refresh-key-32-chars';
+    return jwt.verify(token, refreshSecret) as { id: string };
+  }
+
   async getUserPermissions(userId: string): Promise<string[]> {
     const userRoles = await prisma.userRole.findMany({
       where: { userId },

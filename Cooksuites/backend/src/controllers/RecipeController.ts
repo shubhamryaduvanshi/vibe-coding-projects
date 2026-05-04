@@ -203,6 +203,22 @@ export class RecipeController {
         return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Recipe not found' } });
       }
 
+      // Check if user is owner or admin
+      const userId = req.user?.id;
+      const isAdmin = await prisma.userRole.findFirst({
+        where: {
+          userId,
+          role: { name: 'admin' }
+        }
+      });
+
+      if (existing.userId !== userId && !isAdmin) {
+        return res.status(403).json({ 
+          success: false, 
+          error: { code: 'FORBIDDEN', message: 'You can only delete your own recipes' } 
+        });
+      }
+
       await recipeService.deleteRecipe(recipeId);
 
       res.status(200).json({

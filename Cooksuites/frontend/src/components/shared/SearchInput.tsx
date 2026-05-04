@@ -21,13 +21,13 @@ export function SearchInput({ onSearch, placeholder = 'Search...', defaultValue 
   }, [value, onSearch]);
 
   return (
-    <div className="relative w-full max-w-sm">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+    <div className="relative w-full max-w-2xl hidden md:block">
+      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
       <Input
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        className="pl-10 h-11 rounded-xl bg-white border-zinc-100 focus:border-emerald-500 transition-all"
+        className="pl-11 h-10 rounded-lg bg-zinc-50 border-none focus-visible:ring-1 focus-visible:ring-emerald-500 transition-all text-sm"
       />
     </div>
   );
