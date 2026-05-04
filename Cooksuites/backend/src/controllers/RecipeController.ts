@@ -3,6 +3,7 @@ import { recipeService } from '../services/RecipeService';
 import { z } from 'zod';
 import { AuthRequest } from '../middleware/auth';
 import { PrismaClient } from '@prisma/client';
+import { emailService } from '../services/EmailService';
 
 const prisma = new PrismaClient();
 
@@ -57,6 +58,12 @@ export class RecipeController {
         image: req.file
       }, userId);
 
+      // Fire and forget recipe created email
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+      if (user) {
+        emailService.sendRecipeCreatedEmail(user.email, recipe.title, recipe.id).catch(console.error);
+      }
+
       res.status(201).json({
         success: true,
         data: recipe,
@@ -82,7 +89,7 @@ export class RecipeController {
   async updateRecipe(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const recipeId = req.params.id as string;
-      
+
       // Handle stringified JSON from multipart/form-data
       if (typeof req.body.ingredients === 'string') {
         try {
@@ -159,7 +166,7 @@ export class RecipeController {
   async listRecipes(req: Request, res: Response, next: NextFunction) {
     try {
       const { q, mealType, difficulty, categoryId, minTime, maxTime, cursor, limit } = req.query;
-      
+
       const result = await recipeService.listRecipes({
         q: q as string,
         mealType: mealType as string,

@@ -268,7 +268,9 @@ function EditPermissionsModal({ role, permissions, open, onClose, onSave }: Edit
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
-export default function AdminPage() {
+import { ProtectedRoute } from '@/components/shared/ProtectedRoute';
+
+function AdminPageContent() {
   const [activeTab, setActiveTab] = useState<Tab>('users');
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -644,6 +646,14 @@ export default function AdminPage() {
         onSave={handleSaveRolePermissions}
       />
     </div>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <ProtectedRoute requiredPermission="admin:access">
+      <AdminPageContent />
+    </ProtectedRoute>
   );
 }
 

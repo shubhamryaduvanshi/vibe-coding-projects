@@ -4,6 +4,7 @@ export interface User {
   id: string;
   email: string;
   roles?: { role: { name: string, permissions: unknown[] } }[];
+  permissions?: string[];
 }
 
 export interface AuthState {

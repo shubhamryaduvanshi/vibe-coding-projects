@@ -105,7 +105,7 @@ export default function LoginPage() {
             <div>
               <div className="flex justify-between items-center mb-xs">
                 <label className="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest" htmlFor="password">Password</label>
-                <Link className="font-label-sm text-label-sm text-primary hover:underline" href="#">Forgot password?</Link>
+                <Link className="font-label-sm text-label-sm text-primary hover:underline" href="/forgot-password">Forgot password?</Link>
               </div>
               <div className="relative">
                 <input className="w-full px-md py-md rounded-lg border border-outline-variant bg-surface-bright focus:ring-2 focus:ring-primary-fixed-dim focus:border-primary transition-all outline-none font-body-md text-body-md" id="password" name="password" placeholder="••••••••" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />

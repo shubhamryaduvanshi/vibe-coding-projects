@@ -11,6 +11,7 @@ import mediaRoutes from './routes/mediaRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import adminRoutes from './routes/adminRoutes';
 import mealPlanRoutes from './routes/mealPlanRoutes';
+import userRoutes from './routes/userRoutes';
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/v1/media', mediaRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/meal-plans', mealPlanRoutes);
+app.use('/api/v1/users', userRoutes);
 
 // Basic health check
 app.get('/health', (req, res) => {

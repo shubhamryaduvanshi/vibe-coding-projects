@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -23,6 +24,66 @@ export class AuthService {
     const refreshToken = jwt.sign({ id: userId }, refreshSecret, { expiresIn: '7d' });
 
     return { accessToken, refreshToken };
+  }
+
+  async getUserPermissions(userId: string): Promise<string[]> {
+    const userRoles = await prisma.userRole.findMany({
+      where: { userId },
+      include: {
+        role: {
+          include: {
+            permissions: {
+              include: {
+                permission: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const permissionSet = new Set<string>();
+    for (const ur of userRoles) {
+      for (const rp of ur.role.permissions) {
+        permissionSet.add(`${rp.permission.resource}:${rp.permission.action}`);
+      }
+    }
+
+    return Array.from(permissionSet);
+  }
+
+  async generatePasswordResetToken(userId: string): Promise<string> {
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // 15 mins expiry
+
+    await prisma.passwordResetToken.create({
+      data: {
+        userId,
+        token,
+        expiresAt
+      }
+    });
+
+    return token;
+  }
+
+  async validateAndConsumeResetToken(token: string): Promise<string | null> {
+    const resetToken = await prisma.passwordResetToken.findUnique({
+      where: { token }
+    });
+
+    if (!resetToken) return null;
+
+    if (resetToken.expiresAt < new Date()) {
+      await prisma.passwordResetToken.delete({ where: { id: resetToken.id } });
+      return null;
+    }
+
+    const userId = resetToken.userId;
+    await prisma.passwordResetToken.delete({ where: { id: resetToken.id } });
+
+    return userId;
   }
 }
 
