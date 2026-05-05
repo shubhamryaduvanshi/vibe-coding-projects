@@ -3,7 +3,7 @@ import { apiSlice } from './apiSlice';
 export interface ShoppingListItem {
   id: string;
   name: string;
-  quantity: number;
+  quantity: string;
   unit: string;
   isPurchased: boolean;
 }

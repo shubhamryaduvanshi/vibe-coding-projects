@@ -6,26 +6,38 @@ import { Sidebar } from '@/components/shared/Sidebar';
 import { Header } from '@/components/shared/Header';
 import { shoppingListService } from '@/services/shoppingListService';
 import { ShoppingList } from '@/store/api/shoppingListApi';
-import { 
-  ChevronLeft, 
-  ShoppingCart, 
-  CheckCircle2, 
-  Circle, 
-  Loader2, 
-  Printer, 
-  Share2, 
-  Trash2 
+import {
+  ChevronLeft,
+  ShoppingCart,
+  CheckCircle2,
+  Circle,
+  Loader2,
+  Printer,
+  Share2,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { generateShoppingListPDF } from '@/app/actions/generateShoppingListPDF';
+import { QuantityEditor } from '@/components/shopping-list/QuantityEditor';
+
+const base64ToBlob = (base64: string, type: string) => {
+  const binary = atob(base64);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    array[i] = binary.charCodeAt(i);
+  }
+  return new Blob([array], { type });
+};
 
 export default function ShoppingListDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [list, setList] = useState<ShoppingList | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const fetchList = async () => {
     try {
@@ -53,13 +65,37 @@ export default function ShoppingListDetailPage() {
         if (!prev) return null;
         return {
           ...prev,
-          items: (prev.items || []).map(item => 
+          items: (prev.items || []).map(item =>
             item.id === itemId ? { ...item, isPurchased: !item.isPurchased } : item
           )
         };
       });
     } catch (err) {
       toast.error('Failed to update item');
+    }
+  };
+
+  const handlePrint = async () => {
+    if (!list) return;
+    setIsGeneratingPDF(true);
+    try {
+      const result = await generateShoppingListPDF(list as any);
+      if (result.success && result.pdf) {
+        const blob = base64ToBlob(result.pdf, 'application/pdf');
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `shopping-list-${new Date().toISOString().split('T')[0]}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success('Shopping list downloaded successfully');
+      } else {
+        throw new Error(result.error || 'Failed to generate PDF');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error generating PDF');
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -91,15 +127,15 @@ export default function ShoppingListDetailPage() {
     <div className="min-h-screen bg-background">
       <Sidebar />
       <Header />
-      
+
       <main className="md:ml-64 pt-24 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto">
         <div className="flex flex-col gap-8">
           {/* Top Bar */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => router.push('/shopping-list')}
                 className="rounded-full hover:bg-emerald-50 text-emerald-900"
               >
@@ -108,25 +144,35 @@ export default function ShoppingListDetailPage() {
               <div>
                 <h1 className="text-3xl font-black text-emerald-900 tracking-tight">{list.name}</h1>
                 <p className="text-sm text-zinc-500 font-medium">
-                  {new Date(list.createdAt).toLocaleDateString(undefined, { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                  {new Date(list.createdAt).toLocaleDateString(undefined, {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                   })}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
-              <Button variant="outline" className="rounded-xl border-zinc-200 text-zinc-600 hover:bg-zinc-50">
-                <Printer className="h-4 w-4 mr-2" /> Print
+              <Button
+                variant="outline"
+                className="rounded-xl border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+                onClick={handlePrint}
+                disabled={isGeneratingPDF}
+              >
+                {isGeneratingPDF ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Printer className="h-4 w-4 mr-2" />
+                )}
+                {isGeneratingPDF ? 'Generating...' : 'Download'}
               </Button>
-              <Button variant="outline" className="rounded-xl border-zinc-200 text-zinc-600 hover:bg-zinc-50">
+              <Button disabled variant="outline" className="rounded-xl border-zinc-200 text-zinc-600 hover:bg-zinc-50">
                 <Share2 className="h-4 w-4 mr-2" /> Share
               </Button>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={handleDelete}
                 className="rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600"
               >
@@ -150,9 +196,9 @@ export default function ShoppingListDetailPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex-grow max-w-md w-full">
+                <div className="flex-grow max-w-xl w-full">
                   <div className="h-3 w-full bg-emerald-100 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-emerald-600 transition-all duration-500 ease-out"
                       style={{ width: `${progress}%` }}
                     />
@@ -165,13 +211,13 @@ export default function ShoppingListDetailPage() {
           {/* Items List */}
           <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
             {(list.items || []).map((item) => (
-              <div 
+              <div
                 key={item.id}
                 onClick={() => handleToggle(item.id)}
                 className={cn(
                   "group flex items-center justify-between p-6 rounded-3xl border transition-all cursor-pointer",
-                  item.isPurchased 
-                    ? "bg-zinc-50 border-zinc-100 opacity-60" 
+                  item.isPurchased
+                    ? "bg-zinc-50 border-zinc-100 opacity-60"
                     : "bg-white border-zinc-100 hover:border-emerald-200 hover:shadow-md"
                 )}
               >
@@ -190,12 +236,26 @@ export default function ShoppingListDetailPage() {
                     )}>
                       {item.name}
                     </h4>
-                    <p className="text-sm text-zinc-500 font-medium">
-                      {item.quantity} {item.unit}
-                    </p>
+                    <QuantityEditor 
+                      itemId={item.id}
+                      listId={list.id}
+                      currentQuantity={item.quantity}
+                      currentUnit={item.unit}
+                      onUpdate={(newVal) => {
+                        setList(prev => {
+                          if (!prev) return null;
+                          return {
+                            ...prev,
+                            items: (prev.items || []).map(i => 
+                              i.id === item.id ? { ...i, quantity: newVal } : i
+                            )
+                          };
+                        });
+                      }}
+                    />
                   </div>
                 </div>
-                
+
                 {!item.isPurchased && (
                   <div className="hidden md:block">
                     <span className="text-xs font-black uppercase tracking-widest text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">

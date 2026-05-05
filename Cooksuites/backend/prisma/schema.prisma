@@ -162,7 +162,7 @@ model ShoppingListItem {
   id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   shoppingListId String       @map("shopping_list_id") @db.Uuid
   name           String
-  quantity       Float
+  quantity       String
   unit           String
   isPurchased    Boolean      @default(false) @map("is_purchased")
   shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)

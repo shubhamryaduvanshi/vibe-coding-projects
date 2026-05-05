@@ -36,10 +36,11 @@ export class ShoppingListService {
             const name = key.split('_')[0];
             return {
               name: name.charAt(0).toUpperCase() + name.slice(1),
-              quantity: data.quantity,
+              // @ts-ignore
+              quantity: data.quantity.toString(),
               unit: data.unit
             };
-          })
+          }) as any
         }
       },
       include: { items: true }
@@ -74,9 +75,10 @@ export class ShoppingListService {
         items: {
           create: mergedIngredients.map(ing => ({
             name: ing.name,
-            quantity: ing.quantity,
+            // @ts-ignore
+            quantity: ing.quantity.toString(),
             unit: ing.unit
-          }))
+          })) as any
         }
       },
       include: { items: true }
@@ -110,6 +112,16 @@ export class ShoppingListService {
 
   async deleteShoppingList(id: string): Promise<void> {
     await prisma.shoppingList.delete({ where: { id } });
+  }
+
+  async updateItemQuantity(itemId: string, quantity: string): Promise<any> {
+    return prisma.shoppingListItem.update({
+      where: { id: itemId },
+      data: {
+        // @ts-ignore
+        quantity
+      }
+    });
   }
 }
 

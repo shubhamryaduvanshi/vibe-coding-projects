@@ -75,6 +75,16 @@ export class ShoppingListController {
       next(error);
     }
   }
+
+  async updateItem(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { quantity } = z.object({ quantity: z.string().min(1).max(50) }).parse(req.body);
+      const updated = await shoppingListService.updateItemQuantity(req.params.itemId?.toString(), quantity);
+      res.status(200).json({ success: true, data: updated });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const shoppingListController = new ShoppingListController();
