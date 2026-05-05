@@ -5,6 +5,7 @@ export interface Cookbook {
   id: string;
   name: string;
   description?: string;
+  image?: string | null;
   userId: string;
   createdAt: string;
   updatedAt: string;

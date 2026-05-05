@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { logout } from '@/store/slices/authSlice';
 import { useRouter } from 'next/navigation';
 
-export function Header() {
+export function Header({ children }: { children?: React.ReactNode }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -19,7 +19,8 @@ export function Header() {
   return (
     <header className="md:ml-64 bg-white border-b border-zinc-200 h-16 fixed top-0 right-0 left-0 z-40 flex justify-between items-center px-6 md:px-12">
       <div className="flex items-center gap-4 flex-grow max-w-2xl">
-        <MenuIcon className="md:hidden h-6 w-6 text-zinc-500" />
+        <MenuIcon className="md:hidden h-6 w-6 text-zinc-500 cursor-pointer" />
+        {children}
       </div>
       <div className="flex items-center gap-4">
         <button className="text-zinc-500 hover:bg-zinc-50 p-2 rounded-full transition-colors active:opacity-80 cursor-pointer">

@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { CookbookDialog } from '@/components/cookbooks/CookbookDialog';
+import Image from 'next/image';
 import { 
   Dialog, 
   DialogContent, 
@@ -112,7 +113,8 @@ export default function CookbooksPage() {
           initialData={selectedCookbook ? {
             id: selectedCookbook.id,
             name: selectedCookbook.name,
-            description: selectedCookbook.description
+            description: selectedCookbook.description,
+            image: selectedCookbook.image,
           } : undefined}
           mode={dialogMode}
         />
@@ -144,7 +146,16 @@ export default function CookbooksPage() {
             <Card key={cookbook.id} className="group overflow-hidden border-zinc-100 rounded-[2rem] hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500 cursor-pointer" onClick={() => router.push(`/cookbooks/${cookbook.id}`)}>
               <CardContent className="p-0">
                 <div className="aspect-[4/3] bg-emerald-50 flex items-center justify-center relative overflow-hidden">
-                  <BookOpen className="h-16 w-16 text-emerald-200 group-hover:scale-110 transition-transform duration-500" />
+                  {cookbook.image ? (
+                    <Image
+                      src={cookbook.image.startsWith('http') ? cookbook.image : `http://localhost:4000${cookbook.image}`}
+                      alt={cookbook.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <BookOpen className="h-16 w-16 text-emerald-200 group-hover:scale-110 transition-transform duration-500" />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/10 to-transparent" />
                   
                   {/* Actions Overlay */}

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { cookbookController } from '../controllers/CookbookController';
 import { authenticate } from '../middleware/auth';
 import { cookbookShareController } from '../controllers/CookbookShareController';
+import { upload } from '../middleware/upload';
 
 const router = Router();
 
@@ -11,10 +12,10 @@ router.get('/shared/:token', cookbookShareController.getSharedCookbook);
 // All cookbook routes require authentication
 router.use(authenticate);
 
-router.post('/', cookbookController.create);
+router.post('/', upload.single('image'), cookbookController.create);
 router.get('/', cookbookController.list);
 router.get('/:id', cookbookController.get);
-router.patch('/:id', cookbookController.update);
+router.patch('/:id', upload.single('image'), cookbookController.update);
 router.delete('/:id', cookbookController.delete);
 
 // Recipe association routes

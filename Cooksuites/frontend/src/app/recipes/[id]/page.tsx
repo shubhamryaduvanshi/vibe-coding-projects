@@ -72,6 +72,7 @@ export default function RecipeViewPage() {
     : [];
 
   const mealType = recipe?.mealType || 'Recipe';
+  const dietType = recipe?.dietType;
   const cuisine = recipe?.cuisine;
 
   const mainImageUrl = recipe.images?.[0]?.url
@@ -93,7 +94,7 @@ export default function RecipeViewPage() {
         </div>
         <div className="flex items-center gap-4">
           <AddToCookbookDialog recipeId={id} />
-          <button 
+          <button
             onClick={() => router.push(`/recipes/${id}/edit`)}
             className="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg font-label-sm text-label-sm hover:bg-zinc-50 transition-colors"
           >
@@ -119,8 +120,16 @@ export default function RecipeViewPage() {
                     {cuisine}
                   </span>
                 )}
+                {dietType && (
+                  <span className="bg-emerald-100 text-emerald-800 font-label-sm text-[10px] uppercase tracking-widest px-3 py-1 rounded-full font-bold">
+                    {dietType}
+                  </span>
+                )}
               </div>
               <h1 className="font-display-xl text-display-xl text-primary leading-tight">{recipe.title}</h1>
+              {recipe.description && (
+                <p className="text-zinc-600 text-base leading-relaxed">{recipe.description}</p>
+              )}
 
               <div className="flex flex-wrap gap-8 items-center py-4 border-y border-outline-variant">
                 <div className="flex items-center gap-2">
@@ -141,7 +150,7 @@ export default function RecipeViewPage() {
                   <Users className="text-primary h-5 w-5" />
                   <div className="flex flex-col">
                     <span className="font-label-sm text-[10px] text-on-surface-variant uppercase">Servings</span>
-                    <span className="font-headline-sm text-headline-sm">2 People</span>
+                    <span className="font-headline-sm text-headline-sm">{recipe.servings}</span>
                   </div>
                 </div>
               </div>

@@ -13,16 +13,16 @@ import { Sidebar } from '@/components/shared/Sidebar';
 import { Header } from '@/components/shared/Header';
 import { Button } from '@/components/ui/button';
 import { Recipe } from '@/store/slices/recipeSlice';
-import { 
-  ShoppingCart, 
-  Check, 
-  Loader2, 
-  Utensils, 
-  Plus, 
-  ArrowRight, 
-  AlertCircle, 
-  SearchX, 
-  MoreHorizontal, 
+import {
+  ShoppingCart,
+  Check,
+  Loader2,
+  Utensils,
+  Plus,
+  ArrowRight,
+  AlertCircle,
+  SearchX,
+  MoreHorizontal,
   Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -46,7 +46,7 @@ export default function DashboardPage() {
   const fetchRecentRecipes = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await recipeService.getRecipes({ limit: 6 });
+      const response = await recipeService.getRecipes({ limit: 3 });
       setRecipes(response.data);
       setError(null);
     } catch (err) {
@@ -97,11 +97,11 @@ export default function DashboardPage() {
 
       <main className="md:ml-64 pt-24 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          <section className="md:col-span-8 space-y-8">
+          <section className="md:col-span-12 space-y-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
                 <h2 className="text-4xl font-black text-emerald-900 tracking-tight mb-2">Welcome back, Chef</h2>
-                <p className="text-sm font-medium text-zinc-500">You have {recipes.length} recipes in your collection.</p>
+                {/* <p className="text-sm font-medium text-zinc-500">You have {recipes.length} recipes in your collection.</p> */}
               </div>
               <div className="flex gap-4">
                 {selectionMode ? (
@@ -132,8 +132,8 @@ export default function DashboardPage() {
                       <ShoppingCart className="mr-2 h-4 w-4" />
                       Select for List
                     </Button>
-                    <Button 
-                      onClick={() => router.push('/recipes/create')} 
+                    <Button
+                      onClick={() => router.push('/recipes/create')}
                       className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl h-12 px-6 font-bold flex items-center gap-2 shadow-lg shadow-emerald-100"
                     >
                       <Plus className="h-5 w-5" /> Create Recipe
@@ -152,7 +152,7 @@ export default function DashboardPage() {
                   View All <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3  gap-6">
                 {loading ? (
                   Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="aspect-[4/5] bg-zinc-100 animate-pulse rounded-2xl" />
@@ -171,9 +171,9 @@ export default function DashboardPage() {
                 ) : (
                   recipes.map(recipe => (
                     <div key={recipe.id} className="relative">
-                      <RecipeCard 
-                        recipe={recipe} 
-                        onClick={() => handleRecipeClick(recipe.id)} 
+                      <RecipeCard
+                        recipe={recipe}
+                        onClick={() => handleRecipeClick(recipe.id)}
                       />
                       {selectionMode && (
                         <div className={`absolute top-4 left-4 h-8 w-8 rounded-full border-2 flex items-center justify-center transition-all z-20 ${selectedRecipeIds.includes(recipe.id)
@@ -229,7 +229,7 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <aside className="md:col-span-4 space-y-8">
+          {/* <aside className="md:col-span-4 space-y-8">
             <div className="bg-white rounded-[2rem] border border-zinc-100 p-8 shadow-sm">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-xl font-bold text-emerald-900">Quick Shop</h3>
@@ -243,9 +243,8 @@ export default function DashboardPage() {
                   { name: 'Garlic Bulbs (2)', category: 'Pantry' }
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4 group">
-                    <div className={`h-6 w-6 rounded-lg border-2 flex items-center justify-center transition-all ${
-                      item.checked ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-200 group-hover:border-emerald-200'
-                    }`}>
+                    <div className={`h-6 w-6 rounded-lg border-2 flex items-center justify-center transition-all ${item.checked ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-200 group-hover:border-emerald-200'
+                      }`}>
                       {item.checked && <Check className="h-4 w-4 text-white" />}
                     </div>
                     <span className={`text-sm font-bold ${item.checked ? 'text-zinc-300 line-through' : 'text-emerald-900'}`}>{item.name}</span>
@@ -256,7 +255,7 @@ export default function DashboardPage() {
               <button className="w-full mt-8 py-4 border-2 border-dashed border-zinc-100 rounded-2xl text-sm font-bold text-zinc-400 hover:border-emerald-200 hover:text-emerald-700 transition-all flex items-center justify-center gap-2 group">
                 <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" /> Add Item
               </button>
-              <Button 
+              <Button
                 onClick={() => router.push('/shopping-list')}
                 className="w-full mt-4 bg-emerald-50 text-emerald-700 py-6 rounded-2xl font-bold hover:bg-emerald-100 transition-all border-0 shadow-none h-auto"
               >
@@ -288,7 +287,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </aside>
+          </aside> */}
         </div>
       </main>
 

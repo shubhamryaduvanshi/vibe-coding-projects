@@ -11,13 +11,15 @@ import mediaRoutes from './routes/mediaRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import adminRoutes from './routes/adminRoutes';
 import mealPlanRoutes from './routes/mealPlanRoutes';
+import userRoutes from './routes/userRoutes';
 
 const app = express();
 
 // Security Middlewares
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*'
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true,
 }));
 app.use(express.json());
 
@@ -43,6 +45,7 @@ app.use('/api/v1/media', mediaRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/meal-plans', mealPlanRoutes);
+app.use('/api/v1/users', userRoutes);
 
 // Basic health check
 app.get('/health', (req, res) => {
@@ -51,12 +54,19 @@ app.get('/health', (req, res) => {
 
 // Centralized error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const statusCode = err.statusCode || 500;
+  const isMulterError = err?.name === 'MulterError';
+  const statusCode = isMulterError ? 400 : (err.statusCode || 500);
+  const message = isMulterError
+    ? (err.code === 'LIMIT_FILE_SIZE'
+      ? 'File too large. Maximum size is 5MB.'
+      : err.message || 'Invalid file upload.')
+    : (err.message || 'An unexpected error occurred');
+
   res.status(statusCode).json({
     success: false,
     error: {
-      code: err.code || 'INTERNAL_SERVER_ERROR',
-      message: err.message || 'An unexpected error occurred',
+      code: err.code || (isMulterError ? 'UPLOAD_ERROR' : 'INTERNAL_SERVER_ERROR'),
+      message,
       details: err.details || {}
     },
     meta: {

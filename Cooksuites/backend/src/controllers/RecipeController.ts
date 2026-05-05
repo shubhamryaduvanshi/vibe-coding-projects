@@ -3,13 +3,16 @@ import { recipeService } from '../services/RecipeService';
 import { z } from 'zod';
 import { AuthRequest } from '../middleware/auth';
 import { PrismaClient } from '@prisma/client';
+import { emailService } from '../services/EmailService';
 
 const prisma = new PrismaClient();
 
 const RecipeSchema = z.object({
   title: z.string().min(3).max(200),
   mealType: z.string().optional(),
+  dietType: z.enum(['veg', 'non-veg', 'vegan']).optional(),
   cuisine: z.string().optional(),
+  description: z.string().max(500).optional(),
   ingredients: z.array(z.object({
     name: z.string().min(1),
     quantity: z.coerce.number().positive(),
@@ -57,6 +60,12 @@ export class RecipeController {
         image: req.file
       }, userId);
 
+      // Fire and forget recipe created email
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+      if (user) {
+        emailService.sendRecipeCreatedEmail(user.email, recipe.title, recipe.id).catch(console.error);
+      }
+
       res.status(201).json({
         success: true,
         data: recipe,
@@ -82,7 +91,7 @@ export class RecipeController {
   async updateRecipe(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const recipeId = req.params.id as string;
-      
+
       // Handle stringified JSON from multipart/form-data
       if (typeof req.body.ingredients === 'string') {
         try {
@@ -158,11 +167,12 @@ export class RecipeController {
 
   async listRecipes(req: Request, res: Response, next: NextFunction) {
     try {
-      const { q, mealType, difficulty, categoryId, minTime, maxTime, cursor, limit } = req.query;
-      
+      const { q, mealType, dietType, difficulty, categoryId, minTime, maxTime, cursor, limit } = req.query;
+
       const result = await recipeService.listRecipes({
         q: q as string,
         mealType: mealType as string,
+        dietType: dietType as string,
         difficulty: difficulty as string,
         categoryId: categoryId as string,
         minTime: minTime ? parseInt(minTime as string, 10) : undefined,
@@ -194,6 +204,22 @@ export class RecipeController {
       const existing = await prisma.recipe.findUnique({ where: { id: recipeId } });
       if (!existing || existing.deletedAt) {
         return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Recipe not found' } });
+      }
+
+      // Check if user is owner or admin
+      const userId = req.user?.id;
+      const isAdmin = await prisma.userRole.findFirst({
+        where: {
+          userId,
+          role: { name: 'admin' }
+        }
+      });
+
+      if (existing.userId !== userId && !isAdmin) {
+        return res.status(403).json({ 
+          success: false, 
+          error: { code: 'FORBIDDEN', message: 'You can only delete your own recipes' } 
+        });
       }
 
       await recipeService.deleteRecipe(recipeId);

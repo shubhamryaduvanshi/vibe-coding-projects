@@ -4,6 +4,7 @@ export interface User {
   id: string;
   email: string;
   roles?: { role: { name: string, permissions: unknown[] } }[];
+  permissions?: string[];
 }
 
 export interface AuthState {
@@ -42,8 +43,12 @@ const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    setToken: (state, action: PayloadAction<string>) => {
+      state.token = action.payload;
+      localStorage.setItem('token', action.payload);
+    },
   },
 });
 
-export const { setCredentials, logout, setLoading } = authSlice.actions;
+export const { setCredentials, logout, setLoading, setToken } = authSlice.actions;
 export default authSlice.reducer;

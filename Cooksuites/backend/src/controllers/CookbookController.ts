@@ -5,16 +5,18 @@ import { z } from 'zod';
 
 const CookbookSchema = z.object({
   name: z.string().min(1).max(100),
-  description: z.string().optional()
+  description: z.string().optional(),
+  image: z.any().optional(),
 });
 
 export class CookbookController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const validated = CookbookSchema.parse(req.body);
+      const validated = CookbookSchema.parse({ ...req.body, image: req.file });
       const cookbook = await cookbookService.createCookbook(validated, req.user!.id);
       res.status(201).json({ success: true, data: cookbook });
     } catch (error) {
+      console.error('Cookbook create failed:', error);
       next(error);
     }
   }
@@ -61,10 +63,11 @@ export class CookbookController {
 
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const validated = CookbookSchema.partial().parse(req.body);
+      const validated = CookbookSchema.partial().parse({ ...req.body, image: req.file });
       const cookbook = await cookbookService.updateCookbook(req?.params?.id as string, validated, req.user!.id);
       res.status(200).json({ success: true, data: cookbook });
     } catch (error) {
+      console.error('Cookbook update failed:', error);
       next(error);
     }
   }

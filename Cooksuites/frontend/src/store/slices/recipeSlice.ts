@@ -3,13 +3,16 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface Recipe {
   id: string;
   title: string;
+  description?: string;
+  dietType?: 'veg' | 'non-veg' | 'vegan';
   ingredients: unknown;
   instructions: string;
   cookingTimeMinutes: number;
   difficulty: string;
   images?: { url: string }[];
   category?: { name: string };
-  user?: { email: string };
+  user?: { id: string, email: string };
+  userId?: string;
   cuisine?: string
   mealType?: string;
   servings: number;
