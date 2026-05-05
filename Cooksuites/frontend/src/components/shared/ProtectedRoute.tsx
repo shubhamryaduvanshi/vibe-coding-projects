@@ -12,8 +12,8 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
   requiredPermission,
   redirectTo = '/dashboard'
 }) => {
@@ -25,9 +25,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     if (!loading && !isAuthenticated) {
       router.push('/login');
     } else if (!loading && isAuthenticated && requiredPermission) {
-      const hasPermission = user?.permissions?.includes(requiredPermission) || 
-                            user?.roles?.some(r => r.role.name === 'admin'); // Admins bypass or implicitly have it
-                            
+      const hasPermission =
+        user?.permissions?.includes(requiredPermission) ||
+        user?.permissions?.includes('admin:manage') ||
+        user?.roles?.some(r => r.role.name === 'admin');
+
       if (!hasPermission) {
         router.push(redirectTo);
       }
@@ -44,8 +46,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If a specific permission is required, double check before rendering children
   if (requiredPermission) {
-    const hasPermission = user?.permissions?.includes(requiredPermission) || 
-                          user?.roles?.some(r => r.role.name === 'admin');
+    const hasPermission =
+      user?.permissions?.includes(requiredPermission) ||
+      user?.permissions?.includes('admin:manage') ||
+      user?.roles?.some(r => r.role.name === 'admin');
+
     if (!hasPermission) return null;
   }
 

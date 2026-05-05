@@ -6,10 +6,16 @@ import Image from 'next/image';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/store/slices/authSlice';
 import { useRouter } from 'next/navigation';
+import { ProfileDialog } from './ProfileDialog';
+import { User as UserIcon, Settings } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 export function Header({ children }: { children?: React.ReactNode }) {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -26,18 +32,31 @@ export function Header({ children }: { children?: React.ReactNode }) {
         <button className="text-zinc-500 hover:bg-zinc-50 p-2 rounded-full transition-colors active:opacity-80 cursor-pointer">
           <BellIcon className="h-6 w-6" />
         </button>
-        <button onClick={handleLogout} className="text-zinc-500 hover:bg-zinc-50 p-2 rounded-full transition-colors active:opacity-80 cursor-pointer text-sm font-medium flex items-center gap-1">
+        <button
+          onClick={() => setIsProfileOpen(true)}
+          className="text-zinc-500 hover:bg-zinc-50 p-2 rounded-full transition-colors active:opacity-80 cursor-pointer text-sm font-medium flex items-center gap-1"
+          title="Profile Settings"
+        >
+          <Settings className="h-5 w-5" />
+        </button>
+        <button onClick={handleLogout} className="text-zinc-500 hover:bg-zinc-50 p-2 rounded-full transition-colors active:opacity-80 cursor-pointer text-sm font-medium flex items-center gap-1" title="Logout">
           <LogOutIcon className="h-5 w-5" />
         </button>
-        <div className="h-8 w-8 rounded-full overflow-hidden border border-zinc-200">
-          <Image
-            alt="User profile"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkCAK2_4vDXutPAAeWBONuE16cCVduCpp1vunZ1KbaVD6SFqNGZG-82qrygbsdBsTN2bfCQTzVUZJ67S1UargzIQR01FwBv6OEa7rsMXgVIj92wj2sWKk5cXS7XlgiHLOkornh3uxDu4DlSPRWoWMeWWUaydvKV78oRkW8gkBZxuLeKbkS-p_TWSDkB9Lpmx2x29HquaaybfQ3pXcvNkZLWgFIlcXGOkkiMnMmqhtNb9fa_rMRNVQ_1ULf8AQ4FS5KDOF8I5ynPSmT"
-            height={50}
-            width={50}
-          />
-        </div>
+        <button
+          onClick={() => setIsProfileOpen(true)}
+          className="h-10 w-10 rounded-2xl overflow-hidden border-2 border-emerald-100 bg-emerald-50 flex items-center justify-center hover:border-emerald-300 transition-all active:scale-95 cursor-pointer"
+        >
+          {user?.fullName ? (
+            <span className="text-xs font-black text-emerald-700">
+              {user.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+            </span>
+          ) : (
+            <UserIcon className="h-5 w-5 text-emerald-300" />
+          )}
+        </button>
       </div>
+
+      <ProfileDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
     </header>
   );
 }

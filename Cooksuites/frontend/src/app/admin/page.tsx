@@ -89,7 +89,7 @@ function AssignRolesModal({ user, roles, open, onClose, onSave }: AssignRolesMod
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="rounded-3xl max-w-2xl">
+      <DialogContent className="rounded-3xl w-full sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-emerald-900 font-black flex items-center gap-2">
             <UserCog className="h-5 w-5 text-emerald-600" />
@@ -198,7 +198,7 @@ function EditPermissionsModal({ role, permissions, open, onClose, onSave }: Edit
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="rounded-3xl max-w-2xl">
+      <DialogContent className="rounded-3xl w-full sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-emerald-900 font-black flex items-center gap-2">
             <Settings2 className="h-5 w-5 text-emerald-600" />
