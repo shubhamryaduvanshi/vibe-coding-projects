@@ -3,15 +3,20 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { usePermission } from '@/hooks/usePermission';
 
 interface ListingHeaderProps {
   title: string;
   onAddClick?: () => void;
   addButtonLabel?: string;
+  permission?: string;
   children?: React.ReactNode;
 }
 
-export function ListingHeader({ title, onAddClick, addButtonLabel = 'Add New', children }: ListingHeaderProps) {
+export function ListingHeader({ title, onAddClick, addButtonLabel = 'Add New', permission, children }: ListingHeaderProps) {
+  const hasPermission = usePermission(permission || 'never_match');
+  const showAddButton = onAddClick && (!permission || hasPermission);
+
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
       <div className="flex-grow">
@@ -20,9 +25,9 @@ export function ListingHeader({ title, onAddClick, addButtonLabel = 'Add New', c
           {children}
         </div>
       </div>
-      {onAddClick && (
+      {showAddButton && (
         <div className="flex items-start">
-          <Button 
+          <Button
             onClick={onAddClick}
             className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl px-6 py-6 h-auto font-bold flex items-center gap-2 shadow-lg shadow-emerald-100"
           >

@@ -12,9 +12,11 @@ import {
   ShieldCheck 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePermission } from '@/hooks/usePermission';
 
 export function Sidebar() {
   const pathname = usePathname();
+  const canAccessAdmin = usePermission('admin:manage');
 
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -22,7 +24,7 @@ export function Sidebar() {
     { label: 'Cookbooks', href: '/cookbooks', icon: BookOpen },
     { label: 'Meal Planner', href: '/meal-planner', icon: Calendar },
     { label: 'Shopping List', href: '/shopping-list', icon: ShoppingCart },
-    { label: 'Admin Panel', href: '/admin', icon: ShieldCheck },
+    ...(canAccessAdmin ? [{ label: 'Admin Panel', href: '/admin', icon: ShieldCheck }] : []),
   ];
 
   return (

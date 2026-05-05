@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { toast } from 'sonner';
+import { usePermission } from '@/hooks/usePermission';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -148,6 +149,9 @@ export default function MealPlannerPage() {
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const canEditPlan = usePermission('mealplan:edit');
+  const canGenerateList = usePermission('shopping:create');
+
   // Calendar
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
@@ -166,7 +170,10 @@ export default function MealPlannerPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const recipesRes = await recipeService.getRecipes({ limit: 50 });
+      const recipesRes = await recipeService.getRecipes({
+        limit: 50,
+        dietType: undefined
+      });
       setRecipes(recipesRes.data);
 
       const plans = await mealPlanService.getMealPlans();
@@ -318,8 +325,9 @@ export default function MealPlannerPage() {
           <div className="flex flex-wrap gap-4">
             <Button
               onClick={handleSavePlan}
-              disabled={isSaving || !hasUnsavedChanges}
+              disabled={isSaving || !hasUnsavedChanges || !canEditPlan}
               variant={hasUnsavedChanges ? 'default' : 'outline'}
+              title={!canEditPlan ? "You don't have permission to edit meal plans" : ""}
               className={`rounded-xl h-12 px-6 font-bold shadow-sm transition-all ${hasUnsavedChanges
                 ? 'bg-amber-500 hover:bg-amber-600 text-white border-none'
                 : 'border-zinc-200 text-zinc-400 bg-white'
@@ -331,7 +339,8 @@ export default function MealPlannerPage() {
 
             <Button
               onClick={handleGenerateList}
-              disabled={isGenerating || localEntries.length === 0 || hasUnsavedChanges}
+              disabled={isGenerating || localEntries.length === 0 || hasUnsavedChanges || !canGenerateList}
+              title={!canGenerateList ? "You don't have permission to generate shopping lists" : ""}
               className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl h-12 px-6 font-bold shadow-lg shadow-emerald-100 disabled:opacity-50"
             >
               {isGenerating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <ShoppingCart className="mr-2 h-4 w-4" />}

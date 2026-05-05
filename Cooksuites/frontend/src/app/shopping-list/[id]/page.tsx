@@ -236,17 +236,17 @@ export default function ShoppingListDetailPage() {
                     )}>
                       {item.name}
                     </h4>
-                    <QuantityEditor 
+                    <QuantityEditor
                       itemId={item.id}
                       listId={list.id}
                       currentQuantity={item.quantity}
                       currentUnit={item.unit}
-                      onUpdate={(newVal) => {
+                      onUpdate={(newVal: any) => {
                         setList(prev => {
                           if (!prev) return null;
                           return {
                             ...prev,
-                            items: (prev.items || []).map(i => 
+                            items: (prev.items || []).map(i =>
                               i.id === item.id ? { ...i, quantity: newVal } : i
                             )
                           };

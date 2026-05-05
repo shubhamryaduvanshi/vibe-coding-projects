@@ -32,16 +32,14 @@ export function Header({ children }: { children?: React.ReactNode }) {
         <button className="text-zinc-500 hover:bg-zinc-50 p-2 rounded-full transition-colors active:opacity-80 cursor-pointer">
           <BellIcon className="h-6 w-6" />
         </button>
-        <button
+        {/* <button
           onClick={() => setIsProfileOpen(true)}
           className="text-zinc-500 hover:bg-zinc-50 p-2 rounded-full transition-colors active:opacity-80 cursor-pointer text-sm font-medium flex items-center gap-1"
           title="Profile Settings"
         >
           <Settings className="h-5 w-5" />
-        </button>
-        <button onClick={handleLogout} className="text-zinc-500 hover:bg-zinc-50 p-2 rounded-full transition-colors active:opacity-80 cursor-pointer text-sm font-medium flex items-center gap-1" title="Logout">
-          <LogOutIcon className="h-5 w-5" />
-        </button>
+        </button> */}
+
         <button
           onClick={() => setIsProfileOpen(true)}
           className="h-10 w-10 rounded-2xl overflow-hidden border-2 border-emerald-100 bg-emerald-50 flex items-center justify-center hover:border-emerald-300 transition-all active:scale-95 cursor-pointer"
@@ -53,6 +51,9 @@ export function Header({ children }: { children?: React.ReactNode }) {
           ) : (
             <UserIcon className="h-5 w-5 text-emerald-300" />
           )}
+        </button>
+        <button onClick={handleLogout} className="text-zinc-500 hover:bg-zinc-50 p-2 rounded-full transition-colors active:opacity-80 cursor-pointer text-sm font-medium flex items-center gap-1" title="Logout">
+          <LogOutIcon className="h-5 w-5" />
         </button>
       </div>
 

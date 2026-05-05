@@ -11,12 +11,14 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { usePermission } from '@/hooks/usePermission';
 
 export default function ShoppingListPage() {
   const router = useRouter();
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const canDeleteList = usePermission('shopping:delete');
 
   const fetchLists = async () => {
     try {
@@ -57,6 +59,7 @@ export default function ShoppingListPage() {
           title="Shopping Lists" 
           onAddClick={() => router.push('/dashboard')}
           addButtonLabel="Generate New"
+          permission="shopping:create"
         />
 
         <div className="grid grid-cols-1 gap-4">
@@ -80,14 +83,16 @@ export default function ShoppingListPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={(e) => handleDelete(e, list.id)}
-                      className="text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-xl"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
+                    {canDeleteList && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={(e) => handleDelete(e, list.id)}
+                        className="text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-xl"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
+                    )}
                     <ChevronRight className="h-6 w-6 text-zinc-300 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>

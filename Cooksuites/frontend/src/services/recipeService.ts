@@ -2,11 +2,11 @@ import api from '../lib/api';
 import { Recipe } from '../store/slices/recipeSlice';
 
 export interface RecipeFilters {
+  dietType?: string | undefined;
   search?: string;
   category?: string;
   difficulty?: string;
   mealType?: string;
-  dietType?: string;
   page?: number;
   limit?: number;
   cursor?: string;

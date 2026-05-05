@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 
 import { GenerateListDialog } from '@/components/dashboard/GenerateListDialog';
 import Image from 'next/image';
+import { usePermission } from '@/hooks/usePermission';
 
 export default function DashboardPage() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -42,6 +43,9 @@ export default function DashboardPage() {
   const [selectedRecipeIds, setSelectedRecipeIds] = useState<string[]>([]);
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  const canCreateRecipe = usePermission('recipe:create');
+  const canCreateList = usePermission('shopping:create');
 
   const fetchRecentRecipes = useCallback(async () => {
     try {
@@ -108,7 +112,8 @@ export default function DashboardPage() {
                   <>
                     <Button
                       onClick={() => setShowGenerateDialog(true)}
-                      disabled={selectedRecipeIds.length === 0 || isGenerating}
+                      disabled={selectedRecipeIds.length === 0 || isGenerating || !canCreateList}
+                      title={!canCreateList ? "You don't have permission to generate shopping lists" : ""}
                       className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl h-12 px-6 font-bold shadow-lg shadow-emerald-100"
                     >
                       {isGenerating ? <Loader2 className="animate-spin" /> : <ShoppingCart className="mr-2 h-4 w-4" />}
@@ -124,20 +129,24 @@ export default function DashboardPage() {
                   </>
                 ) : (
                   <>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSelectionMode(true)}
-                      className="rounded-xl h-12 border-emerald-100 text-emerald-700 hover:bg-emerald-50"
-                    >
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      Select for List
-                    </Button>
-                    <Button
-                      onClick={() => router.push('/recipes/create')}
-                      className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl h-12 px-6 font-bold flex items-center gap-2 shadow-lg shadow-emerald-100"
-                    >
-                      <Plus className="h-5 w-5" /> Create Recipe
-                    </Button>
+                    {canCreateList && (
+                      <Button
+                        variant="outline"
+                        onClick={() => setSelectionMode(true)}
+                        className="rounded-xl h-12 border-emerald-100 text-emerald-700 hover:bg-emerald-50"
+                      >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Select for List
+                      </Button>
+                    )}
+                    {canCreateRecipe && (
+                      <Button
+                        onClick={() => router.push('/recipes/create')}
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl h-12 px-6 font-bold flex items-center gap-2 shadow-lg shadow-emerald-100"
+                      >
+                        <Plus className="h-5 w-5" /> Create Recipe
+                      </Button>
+                    )}
                   </>
                 )}
               </div>
@@ -166,7 +175,9 @@ export default function DashboardPage() {
                   <div className="col-span-full p-12 text-center border-2 border-dashed border-zinc-100 rounded-[3rem] text-zinc-400 flex flex-col items-center">
                     <SearchX className="h-10 w-10 mb-4 opacity-20" />
                     <p className="text-lg font-bold text-emerald-900">No recipes yet.</p>
-                    <Link href="/recipes/create" className="text-emerald-700 underline mt-2">Create your first recipe</Link>
+                    {canCreateRecipe && (
+                      <Link href="/recipes/create" className="text-emerald-700 underline mt-2">Create your first recipe</Link>
+                    )}
                   </div>
                 ) : (
                   recipes.map(recipe => (

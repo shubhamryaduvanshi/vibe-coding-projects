@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
+import { usePermission } from '@/hooks/usePermission';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -33,14 +34,13 @@ interface RecipeCardProps {
 export function RecipeCard({ recipe, className, onClick, onDelete }: RecipeCardProps) {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.auth.user);
+  const canDeleteGlobal = usePermission('recipe:delete');
+  const isAdmin = usePermission('admin:manage');
+  const canDelete = canDeleteGlobal && (isAdmin || user?.id === recipe.userId);
+
   const imageUrl = recipe.images?.[0]?.url
     ? (recipe.images[0].url.startsWith('http') ? recipe.images[0].url : `http://localhost:4000${recipe.images[0].url}`)
     : null;
-
-  // Check delete permission
-  const isAdmin = user?.permissions?.includes('admin:manage');
-  const hasDeletePerm = user?.permissions?.includes('recipe:delete');
-  const canDelete = hasDeletePerm && (isAdmin || user?.id === recipe.userId);
 
   const content = (
     <Card className={cn(

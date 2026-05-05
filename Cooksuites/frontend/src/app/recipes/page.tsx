@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { GenerateListDialog } from '@/components/dashboard/GenerateListDialog';
 import { useDispatch } from 'react-redux';
 import { removeRecipe } from '@/store/slices/recipeSlice';
+import { usePermission } from '@/hooks/usePermission';
 import {
   Dialog,
   DialogContent,
@@ -223,13 +224,7 @@ export default function RecipesPage() {
                   <ShoppingCart className="h-4 w-4" />
                   Select for List
                 </Button>
-                <Button
-                  onClick={() => router.push('/recipes/create')}
-                  className="bg-emerald-900 hover:bg-emerald-800 text-white rounded-lg px-4 h-10 font-medium flex items-center gap-2 shadow-sm whitespace-nowrap"
-                >
-                  <Plus className="h-4 w-4" />
-                  Create Recipe
-                </Button>
+                <RecipeCreateButton />
               </>
             )}
           </div>
@@ -382,5 +377,22 @@ export default function RecipesPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function RecipeCreateButton() {
+  const router = useRouter();
+  const canCreate = usePermission('recipe:create');
+
+  if (!canCreate) return null;
+
+  return (
+    <Button
+      onClick={() => router.push('/recipes/create')}
+      className="bg-emerald-900 hover:bg-emerald-800 text-white rounded-lg px-4 h-10 font-medium flex items-center gap-2 shadow-sm whitespace-nowrap"
+    >
+      <Plus className="h-4 w-4" />
+      Create Recipe
+    </Button>
   );
 }

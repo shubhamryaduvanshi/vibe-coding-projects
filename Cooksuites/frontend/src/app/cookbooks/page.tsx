@@ -27,6 +27,9 @@ import {
   DialogFooter 
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { usePermission } from '@/hooks/usePermission';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 export default function CookbooksPage() {
   const router = useRouter();
@@ -38,6 +41,11 @@ export default function CookbooksPage() {
   const [selectedCookbook, setSelectedCookbook] = useState<Cookbook | null>(null);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  const user = useSelector((state: RootState) => state.auth.user);
+  const canEditGlobal = usePermission('cookbook:edit');
+  const canDeleteGlobal = usePermission('cookbook:delete');
+  const isAdmin = usePermission('admin:manage');
 
   const fetchCookbooks = async () => {
     try {
@@ -104,6 +112,7 @@ export default function CookbooksPage() {
             setIsDialogOpen(true);
           }}
           addButtonLabel="New Cookbook"
+          permission="cookbook:create"
         />
 
         <CookbookDialog 
@@ -160,18 +169,24 @@ export default function CookbooksPage() {
                   
                   {/* Actions Overlay */}
                   <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button 
-                      onClick={(e) => handleEditClick(e, cookbook)}
-                      className="p-2 bg-white/90 backdrop-blur-sm rounded-xl text-emerald-700 hover:bg-emerald-50 transition-colors shadow-sm"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={(e) => handleDeleteClick(e, cookbook)}
-                      className="p-2 bg-white/90 backdrop-blur-sm rounded-xl text-red-600 hover:bg-red-50 transition-colors shadow-sm"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {(canEditGlobal && (isAdmin || cookbook.userId === user?.id)) && (
+                      <button 
+                        onClick={(e) => handleEditClick(e, cookbook)}
+                        className="p-2 bg-white/90 backdrop-blur-sm rounded-xl text-emerald-700 hover:bg-emerald-50 transition-colors shadow-sm"
+                        title="Edit Cookbook"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                    )}
+                    {(canDeleteGlobal && (isAdmin || cookbook.userId === user?.id)) && (
+                      <button 
+                        onClick={(e) => handleDeleteClick(e, cookbook)}
+                        className="p-2 bg-white/90 backdrop-blur-sm rounded-xl text-red-600 hover:bg-red-50 transition-colors shadow-sm"
+                        title="Delete Cookbook"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="p-6">
