@@ -9,15 +9,13 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "src/*"
       ]
     },
-    "ignoreDeprecations": "5.0",
-    "types": [
-      "node"
-    ]
+    "ignoreDeprecations": "5.0"
   },
   "include": [
     "src/**/*"

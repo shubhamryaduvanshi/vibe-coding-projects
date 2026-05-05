@@ -9,6 +9,7 @@ const prisma = new PrismaClient();
 
 const RegisterSchema = z.object({
   email: z.string().email(),
+  fullName: z.string().min(2).max(100).regex(/^[a-zA-Z\s\-']+$/, 'Only letters, spaces, hyphens, and apostrophes are allowed'),
   password: z.string().min(8).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/, 'Password must contain at least 1 uppercase, 1 lowercase, and 1 number')
 });
 
@@ -19,7 +20,7 @@ const LoginSchema = z.object({
 
 export class AuthController {
 
-  async register(req: Request, res: Response, next: NextFunction) {
+  public async register(req: Request, res: Response, next: NextFunction) {
     try {
       const validated = RegisterSchema.parse(req.body);
 
@@ -36,6 +37,7 @@ export class AuthController {
       const user = await prisma.user.create({
         data: {
           email: validated.email,
+          fullName: validated.fullName,
           passwordHash
         }
       });
@@ -66,7 +68,7 @@ export class AuthController {
       res.status(201).json({
         success: true,
         data: {
-          user: { id: user.id, email: user.email },
+          user: { id: user.id, email: user.email, fullName: user.fullName },
           accessToken: tokens.accessToken
         },
         meta: { timestamp: new Date().toISOString(), requestId: req.headers['x-request-id'] as string }
@@ -82,7 +84,7 @@ export class AuthController {
     }
   }
 
-  async login(req: Request, res: Response, next: NextFunction) {
+  public async login(req: Request, res: Response, next: NextFunction) {
     try {
       const validated = LoginSchema.parse(req.body);
 
@@ -120,7 +122,7 @@ export class AuthController {
       res.status(200).json({
         success: true,
         data: {
-          user: { id: user.id, email: user.email, permissions },
+          user: { id: user.id, email: user.email, fullName: user.fullName, permissions },
           accessToken: tokens.accessToken
         },
         meta: { timestamp: new Date().toISOString(), requestId: req.headers['x-request-id'] as string }
@@ -136,7 +138,7 @@ export class AuthController {
     }
   }
 
-  async refreshToken(req: Request, res: Response, next: NextFunction) {
+  public async refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
       const refreshToken = req.cookies.refreshToken;
       if (!refreshToken) {
@@ -178,11 +180,11 @@ export class AuthController {
     }
   }
 
-  async getProfile(req: AuthRequest, res: Response, next: NextFunction) {
+  public async getProfile(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const user = await prisma.user.findUnique({
         where: { id: req.user?.id },
-        select: { id: true, email: true, createdAt: true, roles: { include: { role: true } } }
+        select: { id: true, email: true, fullName: true, createdAt: true, roles: { include: { role: true } } }
       });
 
       if (!user) {
@@ -204,7 +206,7 @@ export class AuthController {
     }
   }
 
-  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+  public async forgotPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
 
@@ -228,7 +230,7 @@ export class AuthController {
     }
   }
 
-  async resetPassword(req: Request, res: Response, next: NextFunction) {
+  public async resetPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { token, password } = z.object({
         token: z.string(),

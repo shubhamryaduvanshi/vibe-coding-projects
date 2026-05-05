@@ -6,7 +6,7 @@ import { AuthRequest } from '../middleware/auth';
 const prisma = new PrismaClient();
 
 const UpdateProfileSchema = z.object({
-  email: z.string().email().optional(),
+  fullName: z.string().min(2).max(100).regex(/^[a-zA-Z\s\-']+$/, 'Only letters, spaces, hyphens, and apostrophes are allowed'),
 });
 
 export class UserController {
@@ -14,7 +14,8 @@ export class UserController {
     try {
       const user = await prisma.user.findUnique({
         where: { id: req.user?.id },
-        select: { id: true, email: true, createdAt: true }
+        // @ts-ignore
+        select: { id: true, email: true, fullName: true, createdAt: true }
       });
 
       if (!user) {
@@ -33,24 +34,14 @@ export class UserController {
   async updateMe(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const validated = UpdateProfileSchema.parse(req.body);
-      
-      // If email is being updated, check if it already exists
-      if (validated.email) {
-        const existing = await prisma.user.findUnique({ where: { email: validated.email } });
-        if (existing && existing.id !== req.user?.id) {
-          return res.status(409).json({
-            success: false,
-            error: { code: 'CONFLICT', message: 'Email already in use' }
-          });
-        }
-      }
 
       const updatedUser = await prisma.user.update({
         where: { id: req.user?.id },
         data: {
-          ...(validated.email && { email: validated.email })
-        },
-        select: { id: true, email: true, createdAt: true }
+          fullName: validated.fullName
+        } as any,
+        // @ts-ignore
+        select: { id: true, email: true, fullName: true, createdAt: true }
       });
 
       res.status(200).json({

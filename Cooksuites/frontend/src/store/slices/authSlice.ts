@@ -3,6 +3,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface User {
   id: string;
   email: string;
+  fullName?: string | null;
+  createdAt?: string;
   roles?: { role: { name: string, permissions: unknown[] } }[];
   permissions?: string[];
 }
@@ -47,8 +49,11 @@ const authSlice = createSlice({
       state.token = action.payload;
       localStorage.setItem('token', action.payload);
     },
+    updateUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+    },
   },
 });
 
-export const { setCredentials, logout, setLoading, setToken } = authSlice.actions;
+export const { setCredentials, logout, setLoading, setToken, updateUser } = authSlice.actions;
 export default authSlice.reducer;

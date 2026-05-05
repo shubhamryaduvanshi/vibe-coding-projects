@@ -62,7 +62,11 @@ export function RegisterForm() {
       const res = await fetch('http://localhost:4000/api/v1/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: data.email, password: data.password })
+        body: JSON.stringify({ 
+          email: data.email, 
+          password: data.password, 
+          fullName: data.full_name 
+        })
       });
 
       const responseData = await res.json();

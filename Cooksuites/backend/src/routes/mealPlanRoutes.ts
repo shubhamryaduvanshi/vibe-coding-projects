@@ -9,20 +9,20 @@ const router = Router();
 router.use(authenticate);
 
 // List and Create
-router.get('/', requirePermission('mealplan:read'), mealPlanController.listMealPlans);
-router.post('/', requirePermission('mealplan:create'), mealPlanController.createMealPlan);
+router.get('/', requirePermission('meal-plan:read'), mealPlanController.listMealPlans);
+router.post('/', requirePermission('meal-plan:create'), mealPlanController.createMealPlan);
 
 // Single Meal Plan Operations
-router.get('/:id', requirePermission('mealplan:read'), mealPlanController.getMealPlan);
-router.put('/:id', requirePermission('mealplan:create'), mealPlanController.updateMealPlan); // Note: using create perm for updates too
-router.delete('/:id', requirePermission('mealplan:delete'), mealPlanController.deleteMealPlan);
+router.get('/:id', requirePermission('meal-plan:read'), mealPlanController.getMealPlan);
+router.put('/:id', requirePermission('meal-plan:create'), mealPlanController.updateMealPlan); // Note: using create perm for updates too
+router.delete('/:id', requirePermission('meal-plan:delete'), mealPlanController.deleteMealPlan);
 
 // Entries
-router.post('/:id/entries', requirePermission('mealplan:create'), mealPlanController.addEntry);
-router.put('/:id/entries/bulk', requirePermission('mealplan:create'), mealPlanController.bulkUpdateEntries);
-router.delete('/:id/entries/:entryId', requirePermission('mealplan:create'), mealPlanController.removeEntry);
+router.post('/:id/entries', requirePermission('meal-plan:create'), mealPlanController.addEntry);
+router.put('/:id/entries/bulk', requirePermission('meal-plan:create'), mealPlanController.bulkUpdateEntries);
+router.delete('/:id/entries/:entryId', requirePermission('meal-plan:create'), mealPlanController.removeEntry);
 
 // Shopping List
-router.post('/:id/shopping-list', requirePermission('mealplan:read'), mealPlanController.generateShoppingList);
+router.post('/:id/shopping-list', requirePermission('meal-plan:read'), mealPlanController.generateShoppingList);
 
 export default router;
