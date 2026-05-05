@@ -11,6 +11,7 @@ router.post('/generate', shoppingListController.generate);
 router.get('/', shoppingListController.list);
 router.get('/:id', shoppingListController.get);
 router.patch('/items/:itemId/toggle', shoppingListController.toggleItem);
+router.patch('/:id/items/:itemId', shoppingListController.updateItem);
 router.delete('/:id', shoppingListController.delete);
 
 export default router;

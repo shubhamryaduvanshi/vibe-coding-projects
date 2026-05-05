@@ -26,4 +26,9 @@ export const shoppingListService = {
     const response = await api.delete<{ success: boolean }>(`/shopping-lists/${id}`);
     return response.data;
   },
+
+  updateShoppingItem: async (listId: string, itemId: string, quantity: string) => {
+    const response = await api.patch<{ success: boolean; data: any }>(`/shopping-lists/${listId}/items/${itemId}`, { quantity });
+    return response.data;
+  },
 };
