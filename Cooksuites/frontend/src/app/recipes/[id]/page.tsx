@@ -72,6 +72,7 @@ export default function RecipeViewPage() {
     : [];
 
   const mealType = recipe?.mealType || 'Recipe';
+  const dietType = recipe?.dietType;
   const cuisine = recipe?.cuisine;
 
   const mainImageUrl = recipe.images?.[0]?.url
@@ -119,8 +120,16 @@ export default function RecipeViewPage() {
                     {cuisine}
                   </span>
                 )}
+                {dietType && (
+                  <span className="bg-emerald-100 text-emerald-800 font-label-sm text-[10px] uppercase tracking-widest px-3 py-1 rounded-full font-bold">
+                    {dietType}
+                  </span>
+                )}
               </div>
               <h1 className="font-display-xl text-display-xl text-primary leading-tight">{recipe.title}</h1>
+              {recipe.description && (
+                <p className="text-zinc-600 text-base leading-relaxed">{recipe.description}</p>
+              )}
 
               <div className="flex flex-wrap gap-8 items-center py-4 border-y border-outline-variant">
                 <div className="flex items-center gap-2">

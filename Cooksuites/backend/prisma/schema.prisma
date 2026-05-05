@@ -104,6 +104,8 @@ model Recipe {
   deletedAt          DateTime?        @map("deleted_at") @db.Timestamptz(6)
   cuisine            String?
   mealType           String?          @map("meal_type")
+  description        String?
+  dietType           String?          @map("diet_type")
   servings           Int              @default(1)
   cookbooks          CookbookRecipe[]
   mealPlanEntries    MealPlanEntry[]
@@ -120,6 +122,7 @@ model Cookbook {
   id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
   description String?
+  image       String?
   userId      String           @map("user_id") @db.Uuid
   createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)

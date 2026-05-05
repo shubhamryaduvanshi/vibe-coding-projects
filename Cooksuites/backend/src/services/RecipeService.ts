@@ -6,7 +6,9 @@ const prisma = new PrismaClient();
 export interface RecipeCreateInput {
   title: string;
   mealType?: string;
+  dietType?: 'veg' | 'non-veg' | 'vegan';
   cuisine?: string;
+  description?: string;
   ingredients: { name: string; quantity: number; unit: any }[];
   instructions: string;
   cookingTimeMinutes: number;
@@ -19,7 +21,9 @@ export interface RecipeCreateInput {
 export interface RecipeUpdateInput {
   title?: string;
   mealType?: string;
+  dietType?: 'veg' | 'non-veg' | 'vegan';
   cuisine?: string;
+  description?: string;
   ingredients?: { name: string; quantity: number; unit: any }[];
   instructions?: string;
   cookingTimeMinutes?: number;
@@ -69,12 +73,13 @@ export class RecipeService {
     });
   }
 
-  async listRecipes(filters: { q?: string, mealType?: string, difficulty?: string, categoryId?: string, minTime?: number, maxTime?: number, cursor?: string, limit?: number }): Promise<{ data: Recipe[], hasMore: boolean, nextCursor?: string }> {
-    const { q, mealType, difficulty, categoryId, minTime, maxTime, cursor, limit = 20 } = filters;
+  async listRecipes(filters: { q?: string, mealType?: string, dietType?: string, difficulty?: string, categoryId?: string, minTime?: number, maxTime?: number, cursor?: string, limit?: number }): Promise<{ data: Recipe[], hasMore: boolean, nextCursor?: string }> {
+    const { q, mealType, dietType, difficulty, categoryId, minTime, maxTime, cursor, limit = 20 } = filters;
 
     const where: any = {
       deletedAt: null,
       ...(mealType && { mealType }),
+      ...(dietType && { dietType }),
       ...(difficulty && { difficulty }),
       ...(categoryId && { categoryId }),
       ...((minTime || maxTime) && {

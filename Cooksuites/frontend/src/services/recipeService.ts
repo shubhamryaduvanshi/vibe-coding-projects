@@ -6,6 +6,7 @@ export interface RecipeFilters {
   category?: string;
   difficulty?: string;
   mealType?: string;
+  dietType?: string;
   page?: number;
   limit?: number;
   cursor?: string;

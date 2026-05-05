@@ -54,12 +54,19 @@ app.get('/health', (req, res) => {
 
 // Centralized error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const statusCode = err.statusCode || 500;
+  const isMulterError = err?.name === 'MulterError';
+  const statusCode = isMulterError ? 400 : (err.statusCode || 500);
+  const message = isMulterError
+    ? (err.code === 'LIMIT_FILE_SIZE'
+      ? 'File too large. Maximum size is 5MB.'
+      : err.message || 'Invalid file upload.')
+    : (err.message || 'An unexpected error occurred');
+
   res.status(statusCode).json({
     success: false,
     error: {
-      code: err.code || 'INTERNAL_SERVER_ERROR',
-      message: err.message || 'An unexpected error occurred',
+      code: err.code || (isMulterError ? 'UPLOAD_ERROR' : 'INTERNAL_SERVER_ERROR'),
+      message,
       details: err.details || {}
     },
     meta: {

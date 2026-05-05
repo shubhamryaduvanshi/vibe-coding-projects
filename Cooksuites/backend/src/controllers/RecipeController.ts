@@ -10,7 +10,9 @@ const prisma = new PrismaClient();
 const RecipeSchema = z.object({
   title: z.string().min(3).max(200),
   mealType: z.string().optional(),
+  dietType: z.enum(['veg', 'non-veg', 'vegan']).optional(),
   cuisine: z.string().optional(),
+  description: z.string().max(500).optional(),
   ingredients: z.array(z.object({
     name: z.string().min(1),
     quantity: z.coerce.number().positive(),
@@ -165,11 +167,12 @@ export class RecipeController {
 
   async listRecipes(req: Request, res: Response, next: NextFunction) {
     try {
-      const { q, mealType, difficulty, categoryId, minTime, maxTime, cursor, limit } = req.query;
+      const { q, mealType, dietType, difficulty, categoryId, minTime, maxTime, cursor, limit } = req.query;
 
       const result = await recipeService.listRecipes({
         q: q as string,
         mealType: mealType as string,
+        dietType: dietType as string,
         difficulty: difficulty as string,
         categoryId: categoryId as string,
         minTime: minTime ? parseInt(minTime as string, 10) : undefined,

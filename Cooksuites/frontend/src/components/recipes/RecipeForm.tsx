@@ -28,7 +28,9 @@ import Image from 'next/image';
 
 const recipeSchema = z.object({
   title: z.string().min(3, 'Title is too short').max(200),
+  description: z.string().max(500).optional(),
   mealType: z.enum(['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Dessert']),
+  dietType: z.enum(['veg', 'non-veg', 'vegan']),
   cuisine: z.string().optional(),
   hours: z.coerce.number().min(0),
   minutes: z.coerce.number().min(0).max(59),
@@ -72,6 +74,7 @@ export function RecipeForm({ initialValues, isEditMode = false }: RecipeFormProp
     resolver: zodResolver(recipeSchema),
     defaultValues: {
       mealType: 'Dinner',
+      dietType: 'veg',
       difficulty: 'Medium',
       hours: 0,
       minutes: 30,
@@ -99,6 +102,8 @@ export function RecipeForm({ initialValues, isEditMode = false }: RecipeFormProp
       reset({
         title: initialValues.title,
         mealType: initialValues.mealType || 'Dinner',
+        dietType: initialValues.dietType || 'veg',
+        description: initialValues.description || '',
         cuisine: initialValues.cuisine || '',
         hours,
         minutes,
@@ -210,9 +215,11 @@ export function RecipeForm({ initialValues, isEditMode = false }: RecipeFormProp
       const totalMinutes = (values.hours * 60) + (values.minutes || 0);
       const formData = new FormData();
       formData.append('title', values.title);
+      formData.append('description', values.description || '');
       formData.append('cookingTimeMinutes', totalMinutes.toString());
       formData.append('difficulty', values.difficulty);
       formData.append('mealType', values.mealType);
+      formData.append('dietType', values.dietType);
       formData.append('cuisine', values.cuisine || '');
       formData.append('servings', values.servings.toString());
 
@@ -251,7 +258,6 @@ export function RecipeForm({ initialValues, isEditMode = false }: RecipeFormProp
   };
 
   return (
-    // @ts-ignore
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-12 gap-lg items-start">
       <div className="col-span-12 lg:col-span-8 flex flex-col gap-lg">
         {/* Basic Info */}
@@ -271,6 +277,18 @@ export function RecipeForm({ initialValues, isEditMode = false }: RecipeFormProp
               />
               {errors.title && <p className="text-error text-xs">{errors.title.message}</p>}
             </div>
+            <div className="flex flex-col gap-xs">
+              <label className="font-label-sm text-label-sm text-on-surface-variant uppercase flex justify-between">
+                Description
+                <span className="text-[10px] lowercase opacity-60">(Optional)</span>
+              </label>
+              <textarea
+                {...register('description')}
+                className="w-full rounded-lg border border-outline-variant px-md py-sm focus:ring-2 focus:ring-primary-fixed-dim focus:border-primary transition-all outline-none min-h-[90px]"
+                placeholder="Write a short summary of this recipe."
+              />
+              {errors.description && <p className="text-error text-xs">{errors.description.message}</p>}
+            </div>
             <div className="grid grid-cols-2 gap-lg">
               <div className="flex flex-col gap-xs">
                 <label className="font-label-sm text-label-sm text-on-surface-variant uppercase">Meal Type</label>
@@ -283,6 +301,17 @@ export function RecipeForm({ initialValues, isEditMode = false }: RecipeFormProp
                   <option value="Dinner">Dinner</option>
                   <option value="Snack">Snack</option>
                   <option value="Dessert">Dessert</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-xs">
+                <label className="font-label-sm text-label-sm text-on-surface-variant uppercase">Diet Type</label>
+                <select
+                  {...register('dietType')}
+                  className="w-full rounded-lg border border-outline-variant px-md py-sm focus:ring-2 focus:ring-primary-fixed-dim focus:border-primary transition-all outline-none bg-transparent"
+                >
+                  <option value="veg">Vegetarian</option>
+                  <option value="non-veg">Non-Vegetarian</option>
+                  <option value="vegan">Vegan</option>
                 </select>
               </div>
               <div className="flex flex-col gap-xs">

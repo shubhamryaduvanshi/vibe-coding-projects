@@ -36,6 +36,7 @@ export default function RecipesPage() {
   const [filters, setFilters] = useState<RecipeFilters>({
     search: '',
     mealType: '',
+    dietType: '',
     difficulty: '',
     category: '',
   });
@@ -133,11 +134,19 @@ export default function RecipesPage() {
     });
   };
 
-  const handleClearFilters = () => {
-    setFilters({ search: '', mealType: '', difficulty: '', category: '' });
+  const handleDietTypeChange = (val: string) => {
+    setFilters(prev => {
+      const next = val || undefined;
+      if (prev.dietType === next) return prev;
+      return { ...prev, dietType: next };
+    });
   };
 
-  const activeFilterCount = [filters.difficulty, filters.category, filters.mealType]
+  const handleClearFilters = () => {
+    setFilters({ search: '', mealType: '', dietType: '', difficulty: '', category: '' });
+  };
+
+  const activeFilterCount = [filters.difficulty, filters.category, filters.mealType, filters.dietType]
     .filter(Boolean).length;
 
   const handleRecipeClick = (id: string) => {
@@ -250,6 +259,16 @@ export default function RecipesPage() {
               ]}
               value={filters.mealType || ''}
               onChange={handleMealTypeChange}
+            />
+            <FilterSelect
+              label="Diet Type"
+              options={[
+                { label: 'Vegetarian', value: 'veg' },
+                { label: 'Non-Vegetarian', value: 'non-veg' },
+                { label: 'Vegan', value: 'vegan' },
+              ]}
+              value={filters.dietType || ''}
+              onChange={handleDietTypeChange}
             />
             {activeFilterCount > 0 && (
               <button

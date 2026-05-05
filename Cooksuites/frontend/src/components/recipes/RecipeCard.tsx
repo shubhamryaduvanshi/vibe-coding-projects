@@ -92,13 +92,16 @@ export function RecipeCard({ recipe, className, onClick, onDelete }: RecipeCardP
               {recipe.category?.name || 'Healthy'}
             </span>
             <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-100 px-2.5 py-1 rounded-sm">
-              {recipe.mealType || 'Mediterranean'}
+              {recipe.dietType || recipe.mealType || 'General'}
             </span>
           </div>
 
           <h3 className="text-xl font-bold text-zinc-900 leading-tight mb-4 line-clamp-2">
             {recipe.title}
           </h3>
+          {recipe?.description && (
+            <p className="text-sm text-zinc-500 line-clamp-2 mb-4">{recipe.description}</p>
+          )}
 
           <div className="flex items-center pt-1 mt-auto">
             <div className="flex items-center gap-4 text-zinc-500">

@@ -12,13 +12,19 @@ export const cookbookService = {
     return response.data;
   },
 
-  createCookbook: async (data: Partial<Cookbook>) => {
-    const response = await api.post<{ success: boolean; data: Cookbook }>('/cookbooks', data);
+  createCookbook: async (data: Partial<Cookbook> | FormData) => {
+    const isFormData = data instanceof FormData;
+    const response = await api.post<{ success: boolean; data: Cookbook }>('/cookbooks', data, isFormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    } : undefined);
     return response.data;
   },
 
-  updateCookbook: async (id: string, data: Partial<Cookbook>) => {
-    const response = await api.patch<{ success: boolean; data: Cookbook }>(`/cookbooks/${id}`, data);
+  updateCookbook: async (id: string, data: Partial<Cookbook> | FormData) => {
+    const isFormData = data instanceof FormData;
+    const response = await api.patch<{ success: boolean; data: Cookbook }>(`/cookbooks/${id}`, data, isFormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    } : undefined);
     return response.data;
   },
 

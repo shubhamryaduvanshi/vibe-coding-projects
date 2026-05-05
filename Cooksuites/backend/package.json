@@ -25,6 +25,9 @@
     "nodemailer": "^8.0.7",
     "zod": "^4.4.1"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "devDependencies": {
     "@prisma/client": "^5.22.0",
     "@types/bcrypt": "^6.0.0",

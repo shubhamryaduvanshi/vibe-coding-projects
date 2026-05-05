@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import api from '@/lib/api';
+import { AuthSplitLayout } from '@/components/auth/AuthSplitLayout';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -35,7 +36,17 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 p-4">
+    <AuthSplitLayout
+      title="Forgot Password?"
+      subtitle="Enter your account email and we will send a secure reset link."
+      leftTitle="CookSuite"
+      leftDescription="Keep your kitchen workflow secure and recover access in just a few steps."
+      footer={(
+        <Link href="/login" className="text-sm font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center justify-center gap-2">
+          <ArrowLeft className="h-4 w-4" /> Back to Login
+        </Link>
+      )}
+    >
       <div className="max-w-2xl w-full bg-white rounded-[2rem] shadow-xl p-8 border border-zinc-100">
         <div className="flex flex-col items-center text-center mb-8">
           <div className="h-16 w-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
@@ -87,14 +98,9 @@ export default function ForgotPasswordPage() {
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Send Reset Link'}
             </Button>
 
-            <div className="text-center pt-2">
-              <Link href="/login" className="text-sm font-bold text-emerald-700 hover:text-emerald-800 flex items-center justify-center gap-2">
-                <ArrowLeft className="h-4 w-4" /> Back to Login
-              </Link>
-            </div>
           </form>
         )}
       </div>
-    </div>
+    </AuthSplitLayout>
   );
 }
